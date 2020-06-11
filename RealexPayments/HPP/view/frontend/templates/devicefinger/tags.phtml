@@ -1,0 +1,5 @@
+<?php if ($block->getDeviceFingerEnabled()) : ?>
+    <script src="https://h.online-metrix.net/fp/check.js?org_id=<?php echo $block->escapeHtml($block->getOrgId()); ?>&amp;session_id=<?php echo $block->escapeHtml($block->getMerchantId()); ?><?php echo $block->escapeHtml($block->getSessionId()); ?>"></script>
+    <p style="background:url(https://h.online-metrix.net/fp/clear.png?org_id=<?php echo $block->escapeHtml($block->getOrgId()); ?>&amp;session_id=<?php echo $block->escapeHtml($block->getMerchantId()); ?><?php echo $block->escapeHtml($block->getSessionId()); ?>&amp;m=1)"></p>
+    <img src="https://h.online-metrix.net/fp/clear.png?org_id=<?php echo $block->escapeHtml($block->getOrgId()); ?>&amp;session_id=<?php echo $block->escapeHtml($block->getMerchantId()); ?><?php echo $block->escapeHtml($block->getSessionId()); ?>&amp;m=2" alt="">
+<?php endif; ?>

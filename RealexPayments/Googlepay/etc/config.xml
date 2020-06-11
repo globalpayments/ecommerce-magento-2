@@ -1,0 +1,25 @@
+<?xml version="1.0"?>
+<config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="urn:magento:module:Magento_Store:etc/config.xsd">
+    <default>
+        <payment>
+            <realexpayments_googlepay>
+                <active>1</active>
+                <model>RealexPayments\Googlepay\Model\PaymentMethod</model>
+                <title>Pay By Android Pay</title>
+                <environment>sandbox</environment>
+                <google_payment_cards></google_payment_cards>
+                <globalpay_merchant_id></globalpay_merchant_id>
+                <globalpay_sub_account></globalpay_sub_account>
+                <globalpay_secret></globalpay_secret>
+                <google_merchant_name></google_merchant_name>
+                <google_merchant_id></google_merchant_id>
+                <display_at_cart></display_at_cart>
+                <order_status>pending</order_status>
+                <debug_log>0</debug_log>
+                <live_api_url><![CDATA[https://api.realexpayments.com/epage-remote.cgi]]></live_api_url>
+                <sandbox_api_url><![CDATA[https://api.sandbox.realexpayments.com/epage-remote.cgi]]></sandbox_api_url>
+                <allowspecific>0</allowspecific>
+            </realexpayments_googlepay>
+        </payment>
+    </default>
+</config>

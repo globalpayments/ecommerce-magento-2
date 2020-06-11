@@ -1,0 +1,240 @@
+<?xml version="1.0"?>
+<config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="urn:magento:module:Magento_Config:etc/system_file.xsd">
+    <system>
+        <section id="payment">
+            <group id="realexpayments_hpp_section" translate="label" type="text" sortOrder="101" showInDefault="1" showInWebsite="1" showInStore="1">
+                <label>Global Payments</label>
+                <comment>
+                    <![CDATA[]]>
+                </comment>
+                <attribute type="expanded">1</attribute>
+                <fieldset_css>complex</fieldset_css>
+                <frontend_model>Magento\Paypal\Block\Adminhtml\System\Config\Fieldset\Group</frontend_model>
+                <field id="active" translate="label" type="select" sortOrder="10" showInDefault="1" showInWebsite="1" showInStore="1">
+                    <label>Enabled</label>
+                    <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
+                    <config_path>payment/realexpayments_hpp/active</config_path>
+                </field>
+                <group id="realexpayments_hpp" translate="label" type="text" sortOrder="300" showInDefault="1" showInWebsite="1" showInStore="1">
+                    <label>
+                        <![CDATA[Global Payments Hosted Payment Page (HPP)]]>
+                    </label>
+                    <frontend_model>Magento\Paypal\Block\Adminhtml\System\Config\Fieldset\Payment</frontend_model>
+                    <group id="realexpayments_hpp_basic" translate="label" showInDefault="1" showInWebsite="1" showInStore="1" sortOrder="5">
+                        <comment>
+                            <![CDATA[Reduce the cost of PCI Compliance and risk of chargebacks with our fully customisable Hosted Checkout, Card Storage and Fraud Management solution with Magento 2. If you need a sandbox account <a href="https://www.globalpaymentsinc.com/en-gb/accept-payments/ecommerce/partners/magento" target="_blank">please click here</a>.]]>
+                        </comment>
+                        <label>Basic Settings</label>
+                        <attribute type="expanded">0</attribute>
+                        <frontend_model>Magento\Config\Block\System\Config\Form\Fieldset</frontend_model>
+                        <field id="title" translate="label" type="text" sortOrder="10" showInDefault="1" showInWebsite="1" showInStore="1">
+                            <label>Title</label>
+                            <config_path>payment/realexpayments_hpp/title</config_path>
+                        </field>
+                        <field id="merchant_id" translate="label" type="text" sortOrder="20" showInDefault="1" showInWebsite="1" showInStore="1">
+                            <label>Merchant Id</label>
+                            <config_path>payment/realexpayments_hpp/merchant_id</config_path>
+                        </field>
+                        <field id="merchant_account" translate="label" type="text" sortOrder="30" showInDefault="1" showInWebsite="1" showInStore="1">
+                            <label>Sub-Account</label>
+                            <config_path>payment/realexpayments_hpp/merchant_account</config_path>
+                        </field>
+                        <field id="shared_secret" translate="label" type="obscure" sortOrder="40" showInDefault="1" showInWebsite="1" showInStore="1">
+                            <label>Shared Secret Key</label>
+                            <backend_model>Magento\Config\Model\Config\Backend\Encrypted</backend_model>
+                            <config_path>payment/realexpayments_hpp/shared_secret</config_path>
+                        </field>
+                        <field id="rebate_secret" translate="label" type="obscure" sortOrder="50" showInDefault="1" showInWebsite="1" showInStore="1">
+                            <label>Rebate Secret Key</label>
+                            <backend_model>Magento\Config\Model\Config\Backend\Encrypted</backend_model>
+                            <config_path>payment/realexpayments_hpp/rebate_secret</config_path>
+                        </field>
+                        <field id="environment" translate="label" type="select" sortOrder="60" showInDefault="1" showInWebsite="1" showInStore="1">
+                            <label>Environment</label>
+                            <source_model>RealexPayments\HPP\Model\Config\Source\Environment</source_model>
+                            <config_path>payment/realexpayments_hpp/environment</config_path>
+                        </field>
+                    </group>
+                    <group id="realexpayments_hpp_advanced" translate="label" showInDefault="1" showInWebsite="1" showInStore="1" sortOrder="15">
+                        <comment>
+                            <![CDATA[These settings allow you to configure various options including HPP display settings, settlement type and fraud mode.]]>
+                        </comment>
+                        <label>Advanced Settings</label>
+                        <attribute type="expanded">0</attribute>
+                        <frontend_model>Magento\Config\Block\System\Config\Form\Fieldset</frontend_model>
+                        <field id="payment_methods" translate="label" type="text" sortOrder="10" showInDefault="1" showInWebsite="1" showInStore="1">
+                            <label>Payment Methods</label>
+                            <config_path>payment/realexpayments_hpp/payment_methods</config_path>
+                        </field>
+                        <!--<field id="hpp_challenge_preference" translate="label" type="select" sortOrder="12" showInDefault="1" showInWebsite="1" showInStore="1">
+                            <label>3DS Challenge Preference</label>
+                            <source_model>RealexPayments\HPP\Model\Config\Source\ChallengePreference</source_model>
+                            <config_path>payment/realexpayments_hpp/hpp_challenge_preference</config_path>
+                            <comment>Set whether a challenge is requested for transactions. The Issuer may override whatever preference is specified in this field.</comment>
+                        </field>-->
+                        <field id="card_storage_enabled" translate="label" type="select" sortOrder="12" showInDefault="1" showInWebsite="1" showInStore="1">
+                            <label>Card Storage Enabled</label>
+                            <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
+                            <config_path>payment/realexpayments_hpp/card_storage_enabled</config_path>
+                        </field>
+                        <field id="card_offer_save" translate="label" type="select" sortOrder="16" showInDefault="1" showInWebsite="1" showInStore="1">
+                            <label>Offer to save card</label>
+                            <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
+                            <config_path>payment/realexpayments_hpp/card_offer_save</config_path>
+                        </field>
+                        <field id="card_manage" translate="label" type="select" sortOrder="18" showInDefault="1" showInWebsite="1" showInStore="1">
+                            <label>Manage cards in My Account</label>
+                            <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
+                            <config_path>payment/realexpayments_hpp/card_manage</config_path>
+                        </field>
+                        <field id="order_status" translate="label" type="select" sortOrder="20" showInDefault="1" showInWebsite="1" showInStore="1">
+                            <label>New order status</label>
+                            <tooltip>Status given to newly created orders before payment result is returned.</tooltip>
+                            <source_model>Magento\Sales\Model\Config\Source\Order\Status\NewStatus</source_model>
+                            <config_path>payment/realexpayments_hpp/order_status</config_path>
+                        </field>
+                        <field id="payment_cancelled" translate="label" type="select" sortOrder="30" showInDefault="1" showInWebsite="1" showInStore="1">
+                            <label>Cancelled order status</label>
+                            <tooltip>Status given to orders when payment fails. Add some text about refunds.</tooltip>
+                            <source_model>RealexPayments\HPP\Model\Config\Source\Cancelled</source_model>
+                            <config_path>payment/realexpayments_hpp/payment_cancelled</config_path>
+                        </field>
+                        <field id="iframe_enabled" translate="label" type="select" sortOrder="40" showInDefault="1" showInWebsite="1" showInStore="1">
+                            <label>Iframe Enabled</label>
+                            <tooltip>Iframe is displayed on the checkout page and contains the Global Payments page. Otherwise it will redirect to the Global Payments page for payment and return afterwards.</tooltip>
+                            <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
+                            <config_path>payment/realexpayments_hpp/iframe_enabled</config_path>
+                        </field>
+                        <field id="iframe_mode" translate="label" type="select" sortOrder="45" showInDefault="1" showInWebsite="1" showInStore="1">
+                            <label>Iframe Mode</label>
+                            <tooltip>Lightbox is a popup on the checkout page which contains the Global Payments page in the box. Embedded is part of the checkout page.</tooltip>
+                            <source_model>RealexPayments\HPP\Model\Config\Source\IframeMode</source_model>
+                            <config_path>payment/realexpayments_hpp/iframe_mode</config_path>
+                            <depends>
+                                <field id="iframe_enabled">1</field>
+                            </depends>
+                        </field>
+                        <field id="settle_mode" translate="label" type="select" sortOrder="50" showInDefault="1" showInWebsite="1" showInStore="1">
+                            <label>Settle Mode</label>
+                            <source_model>RealexPayments\HPP\Model\Config\Source\SettleMode</source_model>
+                            <config_path>payment/realexpayments_hpp/settle_mode</config_path>
+                        </field>
+                        <field id="otb_enabled" translate="label" type="select" sortOrder="55" showInDefault="1" showInWebsite="1" showInStore="1">
+                            <label>OTB Enabled</label>
+                            <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
+                            <config_path>payment/realexpayments_hpp/otb_enabled</config_path>
+                        </field>
+                        <field id="fraud_mode" translate="label" type="select" sortOrder="60" showInDefault="1" showInWebsite="1" showInStore="1">
+                            <label>Fraud Mode</label>
+                            <source_model>RealexPayments\HPP\Model\Config\Source\FraudMode</source_model>
+                            <config_path>payment/realexpayments_hpp/fraud_mode</config_path>
+                        </field>
+                        <field id="payment_btn_text" translate="label" type="text" sortOrder="70" showInDefault="1" showInWebsite="1" showInStore="1">
+                            <label>Payment Button Text</label>
+                            <config_path>payment/realexpayments_hpp/payment_btn_text</config_path>
+                        </field>
+                        <field id="card_btn_text" translate="label" type="text" sortOrder="75" showInDefault="1" showInWebsite="1" showInStore="1">
+                            <label>Card Storage Button Text</label>
+                            <config_path>payment/realexpayments_hpp/card_btn_text</config_path>
+                        </field>
+                        <field id="lang" translate="label" type="text" sortOrder="80" showInDefault="1" showInWebsite="1" showInStore="1">
+                            <label>Payment Form Language</label>
+                            <config_path>payment/realexpayments_hpp/lang</config_path>
+                        </field>
+                        <field id="hpp_desc" translate="label" type="text" sortOrder="85" showInDefault="1" showInWebsite="1" showInStore="1">
+                            <label>Statement Description</label>
+                            <config_path>payment/realexpayments_hpp/hpp_desc</config_path>
+                        </field>
+                        <field id="apm_pass_shipping" translate="label" type="select" sortOrder="90" showInDefault="1" showInWebsite="1" showInStore="1">
+                            <label>Paypal Pass Shipping Address</label>
+                            <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
+                            <config_path>payment/realexpayments_hpp/apm_pass_shipping</config_path>
+                        </field>
+                        <field id="apm_address_override" translate="label" type="select" sortOrder="100" showInDefault="1" showInWebsite="1" showInStore="1">
+                            <label>Paypal Allow Address Override</label>
+                            <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
+                            <config_path>payment/realexpayments_hpp/apm_address_override</config_path>
+                        </field>
+                        <field id="debug_log" translate="label" type="select" sortOrder="130" showInDefault="1" showInWebsite="1" showInStore="1">
+                            <label>Enable debug logging</label>
+                            <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
+                            <config_path>payment/realexpayments_hpp/debug_log</config_path>
+                        </field>
+                        <field id="live_payment_url" translate="label" type="text" sortOrder="140" showInDefault="1" showInWebsite="1" showInStore="1">
+                             <label>Production Payment URL</label>
+                             <config_path>payment/realexpayments_hpp/live_payment_url</config_path>
+                        </field>
+                        <field id="sandbox_payment_url" translate="label" type="text" sortOrder="140" showInDefault="1" showInWebsite="1" showInStore="1">
+                            <label>Sandbox Payment URL</label>
+                            <config_path>payment/realexpayments_hpp/sandbox_payment_url</config_path>
+                        </field>
+                        <field id="live_api_url" translate="label" type="text" sortOrder="150" showInDefault="1" showInWebsite="1" showInStore="1">
+                            <label>Production Remote API URL</label>
+                            <config_path>payment/realexpayments_hpp/live_api_url</config_path>
+                        </field>
+                        <field id="sandbox_api_url" translate="label" type="text" sortOrder="150" showInDefault="1" showInWebsite="1" showInStore="1">
+                            <label>Sandbox Remote API URL</label>
+                            <config_path>payment/realexpayments_hpp/sandbox_api_url</config_path>
+                        </field>
+                    </group>
+                    <group id="realexpayments_hpp_fraad_advanced" translate="label" showInDefault="1" showInWebsite="1" showInStore="1" sortOrder="15">
+                        <comment>
+                            <![CDATA[If you are using CyberSource's Decision Manager, here you can configure your account credentials and functionality.]]>
+                        </comment>
+                        <label>Advanced Fraud</label>
+                        <attribute type="expanded">0</attribute>
+                        <frontend_model>Magento\Config\Block\System\Config\Form\Fieldset</frontend_model>
+                        <field id="dm_enabled" translate="label" type="select" sortOrder="20" showInDefault="1" showInWebsite="1" showInStore="1">
+                            <label>Decision Manager Enabled</label>
+                            <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
+                            <config_path>payment/realexpayments_hpp/dm_enabled</config_path>
+                        </field>
+                        <field id="dm_profile" translate="label" type="text" sortOrder="25" showInDefault="1" showInWebsite="1" showInStore="1">
+                            <label>Decision Manager Profile</label>
+                            <config_path>payment/realexpayments_hpp/dm_profile</config_path>
+                        </field>
+                        <field id="dm_fields" translate="label" type="multiselect" sortOrder="30" showInDefault="1" showInWebsite="1" showInStore="1">
+                            <label>Decision Manager Fields</label>
+                            <source_model>RealexPayments\HPP\Model\Config\Source\DMFields</source_model>
+                            <config_path>payment/realexpayments_hpp/dm_fields</config_path>
+                        </field>
+                        <field id="dm_devicefinger_enabled" translate="label" type="select" sortOrder="40" showInDefault="1" showInWebsite="1" showInStore="1">
+                            <label>Device Fingerprinting Enabled</label>
+                            <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
+                            <config_path>payment/realexpayments_hpp/dm_devicefinger_enabled</config_path>
+                        </field>
+                        <field id="dm_devicefinger_org" translate="label" type="text" sortOrder="50" showInDefault="1" showInWebsite="1" showInStore="1">
+                            <label>Device Fingerprinting Org Id</label>
+                            <config_path>payment/realexpayments_hpp/dm_devicefinger_org</config_path>
+                            <depends>
+                                <field id="dm_devicefinger_enabled">1</field>
+                            </depends>
+                        </field>
+                        <field id="dm_devicefinger_merchant" translate="label" type="text" sortOrder="60" showInDefault="1" showInWebsite="1" showInStore="1">
+                            <label>Device Fingerprinting Merchant Id</label>
+                            <config_path>payment/realexpayments_hpp/dm_devicefinger_merchant</config_path>
+                            <depends>
+                                <field id="dm_devicefinger_enabled">1</field>
+                            </depends>
+                        </field>
+                    </group>
+                    <group id="realexpayments_hpp_country_specific" translate="label" showInDefault="1" showInWebsite="1" showInStore="1" sortOrder="25">
+                        <label>Country Specific Settings</label>
+                        <frontend_model>Magento\Config\Block\System\Config\Form\Fieldset</frontend_model>
+                        <field id="allowspecific" translate="label" type="allowspecific" sortOrder="40" showInDefault="1" showInWebsite="1" showInStore="1">
+                            <label>Payment from Applicable Countries</label>
+                            <source_model>Magento\Payment\Model\Config\Source\Allspecificcountries</source_model>
+                            <config_path>payment/realexpayments_hpp/allowspecific</config_path>
+                        </field>
+                        <field id="specificcountry" translate="label" type="multiselect" sortOrder="50" showInDefault="1" showInWebsite="1" showInStore="1">
+                            <label>Payment from Specific Countries</label>
+                            <source_model>Magento\Directory\Model\Config\Source\Country</source_model>
+                            <can_be_empty>1</can_be_empty>
+                            <config_path>payment/realexpayments_hpp/specificcountry</config_path>
+                        </field>
+                    </group>
+                </group>
+            </group>
+        </section>
+    </system>
+</config>

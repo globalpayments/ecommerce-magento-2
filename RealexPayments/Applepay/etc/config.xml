@@ -1,0 +1,33 @@
+<?xml version="1.0"?>
+<config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="urn:magento:module:Magento_Store:etc/config.xsd">
+    <default>
+        <payment>
+            <realexpayments_applepay>
+                <active>1</active>
+                <model>RealexPayments\Applepay\Model\PaymentMethod</model>
+                <title>Pay By Apple Pay</title>
+                <environment>sandbox</environment>
+                <payment_methods>cards</payment_methods>
+                <globalpay_merchant_id></globalpay_merchant_id>
+                <globalpay_sub_account></globalpay_sub_account>
+                <globalpay_secret></globalpay_secret>
+                <merchant_id></merchant_id>
+                <merchant_pem></merchant_pem>
+                <merchant_key></merchant_key>
+                <merchant_key_passphrase></merchant_key_passphrase>
+                <merchant_domain></merchant_domain>
+                <merchant_display_name></merchant_display_name>
+                <display_at_checkout></display_at_checkout>
+                <display_at_cart></display_at_cart>
+                <payment_action>order</payment_action>
+                <order_status>pending</order_status>
+                <payment_cancelled>canceled</payment_cancelled>
+                <debug_log>0</debug_log>
+                <live_payment_url><![CDATA[https://pay.realexpayments.com/pay]]></live_payment_url>
+                <sandbox_payment_url><![CDATA[https://pay.sandbox.realexpayments.com/pay]]></sandbox_payment_url>
+                <live_api_url><![CDATA[https://api.realexpayments.com/epage-remote.cgi]]></live_api_url>
+                <sandbox_api_url><![CDATA[https://api.sandbox.realexpayments.com/epage-remote.cgi]]></sandbox_api_url>
+            </realexpayments_applepay>
+        </payment>
+    </default>
+</config>

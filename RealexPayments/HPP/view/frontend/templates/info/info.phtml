@@ -1,0 +1,8 @@
+<?php
+$_info = $block->getInfo();
+?>
+
+<dl class="payment-method">
+    <?php echo $block->escapeHtml($block->getMethod()->getTitle()) ?><br/>
+        <dt class="title"><?php echo $block->escapeHtml($block->getMethod()->getTitle()) ?></dt>
+</dl>

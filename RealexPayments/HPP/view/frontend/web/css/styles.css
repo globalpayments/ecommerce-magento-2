@@ -1,0 +1,6 @@
+.modal-popup._show .modal-inner-wrap {
+    margin: auto;
+}
+.modal-popup.modal-slide{
+  left:0px;
+}

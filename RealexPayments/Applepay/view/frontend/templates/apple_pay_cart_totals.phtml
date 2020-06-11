@@ -1,0 +1,18 @@
+<?php if($block->canPayWithApplePay()): ?>
+
+    <?php
+    $config = [
+        'id' => 'apple-pay-express-totals',
+        'quoteId' => $block->getQuoteId(),
+        'displayName' => $block->getMerchantName(),
+        'actionSuccess' => $block->getActionSuccess(),
+        'grandTotalAmount' => $block->getAmount(),
+        'isLoggedIn' => $block->isCustomerLoggedIn(),
+        'storeCode' => $block->getStorecode(),
+        'currencyCode' => $block->getCurrencyCode(),
+    ];
+    ?>
+
+    <div id="apple-pay-express-totals" data-mage-init='{ "RealexPayments_Applepay/js/applepay/express": <?php echo  json_encode($config); ?> }'></div>
+
+<?php endif; ?>

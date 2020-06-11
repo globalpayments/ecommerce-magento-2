@@ -1,0 +1,22 @@
+<html>
+<head>
+</head>
+<body>
+
+
+<form id="realexpayments_hpp_form" method="POST" action="<?php echo $block->escapeHtml($block->getFormUrl()) ?>">
+
+    <?php
+    foreach ($block->getFormFields() as $field => $value) {
+        echo '<input type="hidden" name="'.
+            $block->escapeHtml(htmlspecialchars($field, ENT_COMPAT | ENT_HTML401, 'UTF-8')).
+            '" value="'.$block->escapeHtml(htmlspecialchars($value, ENT_COMPAT | ENT_HTML401, 'UTF-8')).'" />';
+    }
+    ?>
+</form>
+<script>
+     document.getElementById('realexpayments_hpp_form').submit();
+</script>
+
+</body>
+</html>

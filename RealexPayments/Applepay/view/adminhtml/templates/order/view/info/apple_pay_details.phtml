@@ -1,0 +1,26 @@
+<?php
+$payment = $block->getPayment();
+$paymentRef = $payment->getAdditionalInformation('payment_ref');
+$orderRef = $payment->getAdditionalInformation('order_ref');
+$card = $payment->getAdditionalInformation('card');
+?>
+
+<div class="admin__page-section-item-content" style="margin-top:20px;">
+    <div class="order-payment-additional">
+        <?php if (!empty($paymentRef)) : ?>
+            <?= $block->escapeHtml(__('Payment reference')) ?>:
+            <?= $block->escapeHtml($paymentRef) ?>
+            </br>
+        <?php endif; ?>
+        <?php if (!empty($orderRef)) : ?>
+            <?= $block->escapeHtml(__('Order ID')) ?>:
+            <?= $block->escapeHtml($orderRef) ?>
+            </br>
+        <?php endif; ?>
+        <?php if (!empty($card)) : ?>
+            <?= $block->escapeHtml(__('Card')) ?>:
+            <?= $block->escapeHtml($card) ?>
+            </br>
+        <?php endif; ?>
+    </div>
+</div>

@@ -1,0 +1,8 @@
+<?php $mustObserve = $block->getObserve();
+if (isset($mustObserve) && $mustObserve) :?>
+  <script>
+      require(['RealexPayments_HPP/js/action/restore-cart'], function(observeAction){
+          observeAction();
+      });
+  </script>
+<?php endif; ?>

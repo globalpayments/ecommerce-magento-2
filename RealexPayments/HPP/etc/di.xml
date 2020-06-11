@@ -1,0 +1,21 @@
+<?xml version="1.0"?>
+<config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:noNamespaceSchemaLocation="urn:magento:framework:ObjectManager/etc/config.xsd">
+    <preference for="RealexPayments\HPP\API\RealexPaymentManagementInterface" type="RealexPayments\HPP\Model\API\RealexPaymentManagement" />
+    <preference for="RealexPayments\HPP\API\RemoteXMLInterface" type="RealexPayments\HPP\Model\API\RemoteXML" />
+    <type name="RealexPayments\HPP\Logger\Handler">
+        <arguments>
+            <argument name="filesystem" xsi:type="object">Magento\Framework\Filesystem\Driver\File</argument>
+        </arguments>
+    </type>
+    <type name="RealexPayments\HPP\Logger\Logger">
+        <arguments>
+            <argument name="name" xsi:type="string">realexpaymentsLogger</argument>
+            <argument name="handlers"  xsi:type="array">
+                <item name="exception" xsi:type="object">RealexPayments\HPP\Logger\Handler\Critical</item>
+                <item name="debug" xsi:type="object">RealexPayments\HPP\Logger\Handler\Debug</item>
+            </argument>
+        </arguments>
+    </type>
+    <preference for="Magento\Sales\Model\Order" type="RealexPayments\HPP\Model\Order" />
+</config>

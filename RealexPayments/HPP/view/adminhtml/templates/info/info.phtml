@@ -1,0 +1,23 @@
+<?php
+/**
+ * @see \Magento\Payment\Block\Info
+ */
+?>
+<?php echo $block->escapeHtml($block->getMethod()->getTitle());
+    $specificInfo = $block->getSpecificInformation();
+    ?>
+    <table class="data-table admin__table-secondary">
+        <?php foreach ($specificInfo as $label => $value) : ?>
+          <tr>
+              <th><?php echo $block->escapeHtml($label)?>:</th>
+              <td>
+                    <?php /* @noEscape */ echo nl2br(
+                        $block->escapeHtml(
+                            implode("\n", $block->getValueAsArray($value, true))
+                        )
+                    );?>
+              </td>
+          </tr>
+        <?php endforeach; ?>
+    </table>
+<?php echo $block->getChildHtml()?>

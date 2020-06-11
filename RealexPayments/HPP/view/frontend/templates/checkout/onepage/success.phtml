@@ -1,0 +1,6 @@
+<?php if ($block->escapeHtml($block->getisRealex())) :?>
+    <p><?php echo $block->escapeHtml(__('Your payment was successful.'));?></p>
+    <?php if ($block->getNewPayer()) :?>
+      <p><?php echo $block->escapeHtml(__('Card details successfully and securely stored.'));?></p>
+    <?php endif ?>
+<?php endif ?>

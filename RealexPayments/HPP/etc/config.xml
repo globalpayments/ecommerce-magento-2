@@ -1,0 +1,42 @@
+<?xml version="1.0"?>
+<config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="urn:magento:module:Magento_Store:etc/config.xsd">
+    <default>
+        <payment>
+            <realexpayments_hpp>
+                <active>0</active>
+                <model>RealexPayments\HPP\Model\PaymentMethod</model>
+                <title>Pay By Credit or Debit Card</title>
+                <environment>sandbox</environment>
+                <payment_methods>cards</payment_methods>
+                <!--<hpp_challenge_preference>01</hpp_challenge_preference>-->
+                <card_storage_enabled>0</card_storage_enabled>
+                <card_offer_save>0</card_offer_save>
+                <card_manage>0</card_manage>
+                <payment_action>order</payment_action>
+                <order_status>pending</order_status>
+                <payment_cancelled>canceled</payment_cancelled>
+                <iframe_enabled>1</iframe_enabled>
+                <iframe_mode>lightbox</iframe_mode>
+                <settle_mode>auto</settle_mode>
+                <otb_enabled>0</otb_enabled>
+                <fraud_mode>default</fraud_mode>
+                <dm_enabled>0</dm_enabled>
+                <payment_btn_text></payment_btn_text>
+                <card_btn_text>Update Card Details</card_btn_text>
+                <lang>EN</lang>
+                <apm_pass_shipping>0</apm_pass_shipping>
+                <apm_address_override>0</apm_address_override>
+                <hpp_desc></hpp_desc>
+                <debug_log>0</debug_log>
+                <dm_devicefinger_enabled>0</dm_devicefinger_enabled>
+                <require_billing_address>0</require_billing_address>
+                <place_order_url>realexpayments_hpp/process/process</place_order_url>
+                <order_place_redirect_url>realexpayments_hpp/process/process</order_place_redirect_url>
+                <live_payment_url><![CDATA[https://pay.realexpayments.com/pay]]></live_payment_url>
+                <sandbox_payment_url><![CDATA[https://pay.sandbox.realexpayments.com/pay]]></sandbox_payment_url>
+                <live_api_url><![CDATA[https://api.realexpayments.com/epage-remote.cgi]]></live_api_url>
+                <sandbox_api_url><![CDATA[https://api.sandbox.realexpayments.com/epage-remote.cgi]]></sandbox_api_url>
+            </realexpayments_hpp>
+        </payment>
+    </default>
+</config>

@@ -69,19 +69,24 @@ class Data extends AbstractHelper
     private $_session;
 
     /**
+     * @var \Magento\Framework\App\DeploymentConfig
+     */
+    protected $_deploymentConfig;
+
+    /**
      * Data constructor.
      *
-     * @param \Magento\Framework\App\Helper\Context             $context
-     * @param \Magento\Framework\Encryption\EncryptorInterface  $encryptor
-     * @param \Magento\Directory\Model\Config\Source\Country    $country
-     * @param \Magento\Quote\Api\CartRepositoryInterface        $quoteRepository
-     * @param \Magento\Framework\Module\ModuleListInterface     $moduleList
-     * @param \Magento\Store\Model\StoreManagerInterface        $storeManager
-     * @param \Magento\Framework\App\ProductMetadataInterface   $productMetadata
-     * @param \Magento\Framework\Module\ResourceInterface       $resourceInterface
-     * @param \Magento\Framework\Locale\ResolverInterface       $resolver
+     * @param \Magento\Framework\App\Helper\Context $context
+     * @param \Magento\Framework\Encryption\EncryptorInterface $encryptor
+     * @param \Magento\Directory\Model\Config\Source\Country $country
+     * @param \Magento\Quote\Api\CartRepositoryInterface $quoteRepository
+     * @param \Magento\Framework\Module\ModuleListInterface $moduleList
+     * @param \Magento\Store\Model\StoreManagerInterface $storeManager
+     * @param \Magento\Framework\App\ProductMetadataInterface $productMetadata
+     * @param \Magento\Framework\Module\ResourceInterface $resourceInterface
+     * @param \Magento\Framework\Locale\ResolverInterface $resolver
      * @param \Magento\Customer\Api\CustomerRepositoryInterface $customerRepository
-     * @param \Magento\Customer\Model\Session                   $session
+     * @param \Magento\Customer\Model\Session $session
      */
     public function __construct(
         \Magento\Framework\App\Helper\Context $context,
@@ -95,7 +100,8 @@ class Data extends AbstractHelper
         \Magento\Framework\Module\ResourceInterface $resourceInterface,
         \Magento\Framework\Locale\ResolverInterface $resolver,
         \Magento\Customer\Api\CustomerRepositoryInterface $customerRepository,
-        \Magento\Customer\Model\Session $session
+        \Magento\Customer\Model\Session $session,
+        \Magento\Framework\App\DeploymentConfig $deploymentConfig
     ) {
         parent::__construct($context);
         $this->_encryptor = $encryptor;
@@ -109,6 +115,7 @@ class Data extends AbstractHelper
         $this->_resolver = $resolver;
         $this->_customerRepository = $customerRepository;
         $this->_session = $session;
+        $this->_deploymentConfig = $deploymentConfig;
     }
 
     /**
@@ -183,7 +190,7 @@ class Data extends AbstractHelper
         $timestamp = strftime('%Y%m%d%H%M%S');
         $merchantId = trim($this->getConfigData('merchant_id'));
         $merchantAccount = trim($this->getConfigData('merchant_account'));
-        $fieldOrderId = uniqid().'_'.$timestamp;
+        $fieldOrderId = uniqid() . '_' . $timestamp;
         $orderCurrencyCode = $this->_storeManager->getStore()->getBaseCurrency()->getCode();
         $amount = 0;
         $customerId = $this->_session->getCustomer()->getId();
@@ -191,7 +198,7 @@ class Data extends AbstractHelper
         $autoSettle = ($settleMode == \RealexPayments\HPP\Model\Config\Source\SettleMode::SETTLEMODE_AUTO) ? '1' : '0';
         $cardPaymentText = $this->getConfigData('card_btn_text');
         $realexLang = $this->getConfigData('lang');
-        $varRef = self::CUSTOMER_ID.'_'.$customerId;
+        $varRef = self::CUSTOMER_ID . '_' . $customerId;
         $prodId = '';
         $shopperLocale = $this->_resolver->getLocale();
         $otbEnabled = true;
@@ -228,18 +235,19 @@ class Data extends AbstractHelper
             $formFields['HPP_POST_DIMENSIONS'] = $baseUrl;
         }
 
-        $formFields['MERCHANT_RESPONSE_URL'] = $baseUrl.'realexpayments_hpp/cards/result';
+        $formFields['MERCHANT_RESPONSE_URL'] =
+            $this->getMerchantBaseResponseUrl() . '/realexpayments_hpp/cards/result';
 
         //Load payer ref customer attribute
         $payerAttr = $this->_customerRepository->getById($customerId)
-                    ->getCustomAttribute('realexpayments_hpp_payerref');
+            ->getCustomAttribute('realexpayments_hpp_payerref');
         $payerRef = (isset($payerAttr) && $payerAttr != null) ? $payerAttr->getValue() : '';
 
         $formFields = $this->setCardStorageFields($formFields, $payerRef);
         $fieldsToSign = "$timestamp.$merchantId.$fieldOrderId.$amount.$orderCurrencyCode.$payerRef.";
 
         $sha1hash = $this->signFields($fieldsToSign);
-        $this->logDebug('Gateway Request:'.print_r($this->stripFields($formFields), true));
+        $this->logDebug('Gateway Request:' . print_r($this->stripFields($formFields), true));
 
         $formFields['SHA1HASH'] = $sha1hash;
         // Sort the array by key using SORT_STRING order
@@ -251,7 +259,7 @@ class Data extends AbstractHelper
     /**
      * Set Card Storage Fields.
      *
-     * @param array  $formFields
+     * @param array $formFields
      * @param string $payerRef
      *
      * @return $array
@@ -336,10 +344,10 @@ class Data extends AbstractHelper
         }
         $returnedFields = [];
         $excludedFields = [
-          'SHA1HASH',
-          'REFUNDHASH',
-          'EXPDATE',
-          'SAVED_PMT_EXPDATE',
+            'SHA1HASH',
+            'REFUNDHASH',
+            'EXPDATE',
+            'SAVED_PMT_EXPDATE',
         ];
         foreach ($response as $key => $field) {
             if (!in_array(strtoupper($key), $excludedFields)) {
@@ -395,9 +403,11 @@ class Data extends AbstractHelper
      */
     public function stripXML($xml)
     {
-        $patterns = ['/(<sha1hash>).+(<\/sha1hash>)/',
-                      '/(<md5hash>).+(<\/md5hash>)/',
-                      '/(<refundhash>).+(<\/refundhash>)/', ];
+        $patterns = [
+            '/(<sha1hash>).+(<\/sha1hash>)/',
+            '/(<md5hash>).+(<\/md5hash>)/',
+            '/(<refundhash>).+(<\/refundhash>)/',
+        ];
 
         return preg_replace($patterns, '', $xml);
     }
@@ -405,7 +415,7 @@ class Data extends AbstractHelper
     /**
      * @desc Converts the magento decimal amount into a int one used by Realex
      *
-     * @param float  $amount
+     * @param float $amount
      * @param string $currencyCode
      *
      * @return int
@@ -463,15 +473,35 @@ class Data extends AbstractHelper
 
     private function checkForFirstMinorUnit($currencyCode)
     {
-        return in_array($currencyCode, ['BYR', 'BIF', 'CLP', 'DJF', 'GNF', 'ISK', 'KMF',
-            'KRW', 'PYG', 'RWF', 'UGX', 'UYI', 'VUV', 'VND', 'XAF', 'XOF', 'XPF', ]);
+        return in_array(
+            $currencyCode,
+            [
+                'BYR',
+                'BIF',
+                'CLP',
+                'DJF',
+                'GNF',
+                'ISK',
+                'KMF',
+                'KRW',
+                'PYG',
+                'RWF',
+                'UGX',
+                'UYI',
+                'VUV',
+                'VND',
+                'XAF',
+                'XOF',
+                'XPF',
+            ]
+        );
     }
 
     /**
      * @desc Sets additional information fields on the payment class
      *
      * @param \Magento\Sales\Model\Order\Payment $payment
-     * @param array                              $response
+     * @param array $response
      */
     public function setAdditionalInfo($payment, $response)
     {
@@ -532,7 +562,7 @@ class Data extends AbstractHelper
      */
     public function getConfig($field, $paymentMethodCode, $storeId, $flag = false)
     {
-        $path = 'payment/'.$paymentMethodCode.'/'.$field;
+        $path = 'payment/' . $paymentMethodCode . '/' . $field;
         if (null === $storeId) {
             $storeId = $this->_storeManager->getStore();
         }
@@ -542,5 +572,19 @@ class Data extends AbstractHelper
         } else {
             return $this->scopeConfig->isSetFlag($path, \Magento\Store\Model\ScopeInterface::SCOPE_STORE, $storeId);
         }
+    }
+
+    public function getMerchantBaseResponseUrl()
+    {
+        $mode = $this->_deploymentConfig->get(\Magento\Framework\App\State::PARAM_MODE);
+        $devUrl = $this->_deploymentConfig->get('dev_realexpayments_hpp_response_url');
+
+        if ($mode == \Magento\Framework\App\State::MODE_DEVELOPER && $devUrl) {
+            $responseUrl = $devUrl;
+        } else {
+            $responseUrl = $this->_storeManager->getStore()->getBaseUrl(\Magento\Framework\UrlInterface::URL_TYPE_LINK);
+        }
+
+        return trim($responseUrl, '/');
     }
 }

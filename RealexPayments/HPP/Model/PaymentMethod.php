@@ -2,14 +2,14 @@
 
 namespace RealexPayments\HPP\Model;
 
+use Magento\Framework\DataObject;
+use Magento\Payment\Model\Method\ConfigInterface;
+use Magento\Payment\Model\Method\Online\GatewayInterface;
 use Magento\Sales\Model\Order\Address;
 use RealexPayments\HPP\Model\Config\Source\ChallengePreference;
 use RealexPayments\HPP\Model\Config\Source\DMFields;
 use RealexPayments\HPP\Model\Config\Source\FraudMode;
 use RealexPayments\HPP\Model\Config\Source\SettleMode;
-use Magento\Framework\DataObject;
-use Magento\Payment\Model\Method\ConfigInterface;
-use Magento\Payment\Model\Method\Online\GatewayInterface;
 
 class PaymentMethod extends \Magento\Payment\Model\Method\AbstractMethod implements GatewayInterface
 {
@@ -431,7 +431,8 @@ class PaymentMethod extends \Magento\Payment\Model\Method\AbstractMethod impleme
         }
         $formFields = $this->setDMFields($formFields, $order);
         $formFields = $this->setAPMFields($formFields, $order->getShippingAddress());
-        $formFields['MERCHANT_RESPONSE_URL'] = $baseUrl . 'realexpayments_hpp/process/result';
+        $formFields['MERCHANT_RESPONSE_URL'] =
+            $this->_helper->getMerchantBaseResponseUrl() . '/realexpayments_hpp/process/result';
 
         $cardStoreEnabled = $this->_helper->getConfigData('card_storage_enabled');
         if ($cardStoreEnabled && !empty($customerId)) {
@@ -465,10 +466,10 @@ class PaymentMethod extends \Magento\Payment\Model\Method\AbstractMethod impleme
             ChallengePreference::CHALLENGE_3DS_MANDATE => 'CHALLENGE_MANDATED'
         ];
 
-//	    $hppChallengeRequestPreference = $this->_helper->getConfigData('hpp_challenge_preference') ?: "01";
+        //$hppChallengeRequestPreference = $this->_helper->getConfigData('hpp_challenge_preference') ?: "01";
 
         $additionalHppData = [
-//		    "HPP_CHALLENGE_REQUEST_INDICATOR" => isset($hppChallengeRequestOptions[$hppChallengeRequestPreference]) ? $hppChallengeRequestOptions[$hppChallengeRequestPreference] : "NO_PREFERENCE"
+            //"HPP_CHALLENGE_REQUEST_INDICATOR" => isset($hppChallengeRequestOptions[$hppChallengeRequestPreference]) ? $hppChallengeRequestOptions[$hppChallengeRequestPreference] : "NO_PREFERENCE"
         ];
 
         $additionalHppData[] = [
@@ -522,7 +523,6 @@ class PaymentMethod extends \Magento\Payment\Model\Method\AbstractMethod impleme
                 $shippingAddress->getCountryId()
             ) : ''
         ];
-
 
         // order and type does matter
         if (array_values($hppBillingFields) === array_values($hppShippingFields)) {
@@ -798,7 +798,7 @@ class PaymentMethod extends \Magento\Payment\Model\Method\AbstractMethod impleme
      */
     private function getCountryNumericCodes()
     {
-        return array(
+        return [
             'AF' => '004',
             'AX' => '248',
             'AL' => '008',
@@ -1048,7 +1048,7 @@ class PaymentMethod extends \Magento\Payment\Model\Method\AbstractMethod impleme
             'YE' => '887',
             'ZM' => '894',
             'ZW' => '716',
-        );
+        ];
     }
 
     /**

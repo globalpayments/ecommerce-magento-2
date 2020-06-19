@@ -73,6 +73,8 @@ class Data extends AbstractHelper
      */
     protected $_deploymentConfig;
 
+    protected $_storeId;
+
     /**
      * Data constructor.
      *
@@ -116,6 +118,11 @@ class Data extends AbstractHelper
         $this->_customerRepository = $customerRepository;
         $this->_session = $session;
         $this->_deploymentConfig = $deploymentConfig;
+    }
+
+    public function setStoreId($storeId) {
+        $this->_storeId = $storeId;
+        return $this;
     }
 
     /**
@@ -563,6 +570,11 @@ class Data extends AbstractHelper
     public function getConfig($field, $paymentMethodCode, $storeId, $flag = false)
     {
         $path = 'payment/' . $paymentMethodCode . '/' . $field;
+
+        if (!$storeId) {
+            $storeId = $this->_storeId;
+        }
+
         if (null === $storeId) {
             $storeId = $this->_storeManager->getStore();
         }

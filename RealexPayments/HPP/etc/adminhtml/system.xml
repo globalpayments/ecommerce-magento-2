@@ -99,6 +99,12 @@
                             <source_model>RealexPayments\HPP\Model\Config\Source\Cancelled</source_model>
                             <config_path>payment/realexpayments_hpp/payment_cancelled</config_path>
                         </field>
+                        <field id="payment_successful" translate="label" type="select" sortOrder="35" showInDefault="1" showInWebsite="1" showInStore="1">
+                            <label>Successful payment order status</label>
+                            <tooltip>Status given to an order after successful payment.</tooltip>
+                            <source_model>Magento\Sales\Model\Config\Source\Order\Status\Processing</source_model>
+                            <config_path>payment/realexpayments_hpp/payment_successful</config_path>
+                        </field>
                         <field id="iframe_enabled" translate="label" type="select" sortOrder="40" showInDefault="1" showInWebsite="1" showInStore="1">
                             <label>Iframe Enabled</label>
                             <tooltip>Iframe is displayed on the checkout page and contains the Global Payments page. Otherwise it will redirect to the Global Payments page for payment and return afterwards.</tooltip>

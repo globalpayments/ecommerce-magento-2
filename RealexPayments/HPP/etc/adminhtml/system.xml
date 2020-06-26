@@ -90,7 +90,7 @@
                         <field id="order_status" translate="label" type="select" sortOrder="20" showInDefault="1" showInWebsite="1" showInStore="1">
                             <label>New order status</label>
                             <tooltip>Status given to newly created orders before payment result is returned.</tooltip>
-                            <source_model>Magento\Sales\Model\Config\Source\Order\Status\NewStatus</source_model>
+                            <source_model>RealexPayments\HPP\Model\Config\Source\Order\Status\NewOrderStatus</source_model>
                             <config_path>payment/realexpayments_hpp/order_status</config_path>
                         </field>
                         <field id="payment_cancelled" translate="label" type="select" sortOrder="30" showInDefault="1" showInWebsite="1" showInStore="1">

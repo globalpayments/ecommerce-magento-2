@@ -13,7 +13,7 @@
                 <card_offer_save>0</card_offer_save>
                 <card_manage>0</card_manage>
                 <payment_action>order</payment_action>
-                <order_status>pending</order_status>
+                <order_status>pending_payment</order_status>
                 <payment_cancelled>canceled</payment_cancelled>
                 <iframe_enabled>1</iframe_enabled>
                 <iframe_mode>lightbox</iframe_mode>

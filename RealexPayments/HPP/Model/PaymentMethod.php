@@ -230,9 +230,20 @@ class PaymentMethod extends \Magento\Payment\Model\Method\AbstractMethod impleme
         $payment = $this->getInfoInstance();
         $order = $payment->getOrder();
         $order->setCanSendNewEmailFlag(false);
+        $storeId = $order->getStoreId();
 
-        $stateObject->setState(\Magento\Sales\Model\Order::STATE_NEW);
-        $stateObject->setStatus($this->_helper->getConfigData('order_status'));
+        $status = $this->_helper->getConfigData('order_status', $storeId);
+        if (!$status || array_key_exists(
+            $status,
+            $order->getConfig()->getStateStatuses(\Magento\Sales\Model\Order::STATE_PENDING_PAYMENT)
+        )) {
+            $state = \Magento\Sales\Model\Order::STATE_PENDING_PAYMENT;
+        } else {
+            $state = \Magento\Sales\Model\Order::STATE_NEW;
+        }
+
+        $stateObject->setState($state);
+        $stateObject->setStatus($status);
         $stateObject->setIsNotified(false);
     }
 

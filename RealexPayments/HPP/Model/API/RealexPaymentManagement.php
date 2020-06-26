@@ -109,7 +109,7 @@ class RealexPaymentManagement implements \RealexPayments\HPP\API\RealexPaymentMa
 
         $confirmedPaymentStatus = $this->_helper->getConfigData('payment_successful', $order->getStoreId());
         if (empty($confirmedPaymentStatus)) {
-            $confirmedPaymentStatus = \Magento\Sales\Model\Order::STATE_PROCESSING;
+            $confirmedPaymentStatus = $order->getConfig()->getStateDefaultStatus(\Magento\Sales\Model\Order::STATE_PROCESSING);
         }
 
         //Set information

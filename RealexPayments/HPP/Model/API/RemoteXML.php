@@ -64,8 +64,10 @@ class RemoteXML implements \RealexPayments\HPP\API\RemoteXMLInterface
      */
     public function settle($payment, $amount)
     {
+        $storeId = $payment->getOrder()->getStoreId();
         $additional = $payment->getAdditionalInformation();
         $request = $this->_requestFactory->create()
+                    ->setStoreId($storeId)
                     ->setType(Request\Request::TYPE_SETTLE)
                     ->setMerchantId($additional['MERCHANT_ID'])
                     ->setOrderId($additional['ORDER_ID'])
@@ -81,8 +83,10 @@ class RemoteXML implements \RealexPayments\HPP\API\RemoteXMLInterface
      */
     public function multisettle($payment, $amount)
     {
+        $storeId = $payment->getOrder()->getStoreId();
         $additional = $payment->getAdditionalInformation();
         $request = $this->_requestFactory->create()
+                    ->setStoreId($storeId)
                     ->setType(Request\Request::TYPE_MULTISETTLE)
                     ->setMerchantId($additional['MERCHANT_ID'])
                     ->setOrderId($additional['ORDER_ID'])
@@ -100,7 +104,10 @@ class RemoteXML implements \RealexPayments\HPP\API\RemoteXMLInterface
      */
     public function rebate($payment, $amount, $comments)
     {
-        $refundhash = sha1($this->_helper->getEncryptedConfigData('rebate_secret'));
+        $storeId = $payment->getOrder()->getStoreId();
+        $refundhash = sha1(
+            $this->_helper->setStoreId($storeId)->getEncryptedConfigData('rebate_secret')
+        );
         $transaction = $this->_getTransaction($payment);
         $additional = $payment->getAdditionalInformation();
         if ($additional['AUTO_SETTLE_FLAG'] == SettleMode::SETTLEMODE_MULTI) {
@@ -114,6 +121,7 @@ class RemoteXML implements \RealexPayments\HPP\API\RemoteXMLInterface
             $pasref = $additional['PASREF'];
         }
         $request = $this->_requestFactory->create()
+                  ->setStoreId($storeId)
                   ->setType(Request\Request::TYPE_REBATE)
                   ->setMerchantId($additional['MERCHANT_ID'])
                   ->setAccount($additional['ACCOUNT'])
@@ -134,6 +142,7 @@ class RemoteXML implements \RealexPayments\HPP\API\RemoteXMLInterface
      */
     public function void($payment, $comments)
     {
+        $storeId = $payment->getOrder()->getStoreId();
         $transaction = $this->_getTransaction($payment);
         $additional = $payment->getAdditionalInformation();
         $orderId = $additional['ORDER_ID'];
@@ -146,6 +155,7 @@ class RemoteXML implements \RealexPayments\HPP\API\RemoteXMLInterface
             $pasref = $additional['PASREF'];
         }
         $request = $this->_requestFactory->create()
+                  ->setStoreId($storeId)
                   ->setType(Request\Request::TYPE_VOID)
                   ->setMerchantId($additional['MERCHANT_ID'])
                   ->setAccount($additional['ACCOUNT'])
@@ -162,7 +172,10 @@ class RemoteXML implements \RealexPayments\HPP\API\RemoteXMLInterface
      */
     public function payerEdit($merchantId, $account, $payerRef, $customer)
     {
+        $storeId = $customer->getStoreId();
+
         $request = $this->_requestFactory->create()
+                  ->setStoreId($storeId)
                   ->setType(Request\Request::TYPE_PAYER_EDIT)
                   ->setMerchantId($merchantId)
                   ->setAccount($account)
@@ -179,14 +192,17 @@ class RemoteXML implements \RealexPayments\HPP\API\RemoteXMLInterface
      */
     public function releasePayment($payment, $comments)
     {
+        $storeId = $payment->getOrder()->getStoreId();
         $additional = $payment->getAdditionalInformation();
         $request = $this->_requestFactory->create()
+                    ->setStoreId($storeId)
                     ->setType(Request\Request::TYPE_RELEASE)
                     ->setMerchantId($additional['MERCHANT_ID'])
                     ->setAccount($additional['ACCOUNT'])
                     ->setOrderId($additional['ORDER_ID'])
                     ->setPasref($additional['PASREF'])
                     ->setComments($comments)
+                    ->setStoreId($payment->getOrder()->getStoreId())
                     ->build();
 
         return $this->_sendRequest($request);
@@ -197,8 +213,10 @@ class RemoteXML implements \RealexPayments\HPP\API\RemoteXMLInterface
      */
     public function holdPayment($payment, $comments)
     {
+        $storeId = $payment->getOrder()->getStoreId();
         $additional = $payment->getAdditionalInformation();
         $request = $this->_requestFactory->create()
+                    ->setStoreId($storeId)
                     ->setType(Request\Request::TYPE_HOLD)
                     ->setMerchantId($additional['MERCHANT_ID'])
                     ->setAccount($additional['ACCOUNT'])

@@ -131,6 +131,12 @@ class Request
 
         return $this;
     }
+
+    public function setStoreId($storeId) {
+        $this->_helper->setStoreId($storeId);
+        return $this;
+    }
+
     /**
      * @desc Build the request and return the xml
      *

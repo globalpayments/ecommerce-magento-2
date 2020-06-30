@@ -106,6 +106,12 @@ class RealexPaymentManagement implements \RealexPayments\HPP\API\RealexPaymentMa
 
         $settleMode = $this->_helper->getConfigData('settle_mode', $order->getStoreId());
         $isAutoSettle = $settleMode == SettleMode::SETTLEMODE_AUTO;
+
+        $confirmedPaymentStatus = $this->_helper->getConfigData('payment_successful', $order->getStoreId());
+        if (empty($confirmedPaymentStatus)) {
+            $confirmedPaymentStatus = $order->getConfig()->getStateDefaultStatus(\Magento\Sales\Model\Order::STATE_PROCESSING);
+        }
+
         //Set information
         $payment->setTransactionId($pasref);
         $this->_helper->setAdditionalInfo($payment, $response);
@@ -121,7 +127,7 @@ class RealexPaymentManagement implements \RealexPayments\HPP\API\RealexPaymentMa
         $payment->place();
         if ($fraud) {
             $order->setState(\Magento\Sales\Model\Order::STATE_PAYMENT_REVIEW)
-                  ->setStatus(\Magento\Sales\Model\Order::STATUS_FRAUD);
+                ->setStatus(\Magento\Sales\Model\Order::STATUS_FRAUD);
         } else {
             //Write comment
             $this->_paymentIsAuthorised($order, $pasref, $amount);
@@ -129,10 +135,11 @@ class RealexPaymentManagement implements \RealexPayments\HPP\API\RealexPaymentMa
             //Should we invoice
             if ($isAutoSettle) {
                 $this->_invoice($order, $pasref, $amount);
-            } else {
-                $order->setState(\Magento\Sales\Model\Order::STATE_PROCESSING)
-                      ->setStatus(\Magento\Sales\Model\Order::STATE_PROCESSING);
             }
+
+            $order->setState(\Magento\Sales\Model\Order::STATE_PROCESSING)
+                ->setStatus($confirmedPaymentStatus);
+
         }
 
         $order->save();

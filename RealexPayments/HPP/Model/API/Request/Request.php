@@ -11,6 +11,7 @@ class Request
     const TYPE_RELEASE = 'release';
     const TYPE_VOID = 'void';
     const TYPE_PAYER_EDIT = 'payer-edit';
+    const TYPE_QUERY = 'query';
     const NOT_AVAILABLE = 'N/A';
     /**
      * @var \RealexPayments\HPP\Helper\Data

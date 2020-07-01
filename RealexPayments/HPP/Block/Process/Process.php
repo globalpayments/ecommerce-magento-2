@@ -70,8 +70,16 @@ class Process extends \Magento\Payment\Block\Form
     {
         $result = [];
         try {
-            if ($this->_order->getPayment()) {
-                $result = $this->_order->getPayment()->getMethodInstance()->getFormFields();
+            $payment = $this->_order->getPayment();
+            if ($payment) {
+                $result = $payment->getMethodInstance()->getFormFields();
+                $additionalInfo = [];
+                $additionalInfo['MERCHANT_ID'] = $result['MERCHANT_ID'];
+                $additionalInfo['ACCOUNT'] = $result['ACCOUNT'];
+                $additionalInfo['ORDER_ID'] = $result['ORDER_ID'];
+                $additionalInfo['AMOUNT'] = $result['AMOUNT'];
+                $this->_helper->setAdditionalInfo($payment, $additionalInfo);
+                $this->_order->save();
             }
         } catch (Exception $e) {
             // do nothing for now

@@ -55,8 +55,12 @@ class Reconcile extends \Magento\Sales\Controller\Adminhtml\Order
                 $payment = $order->getPayment();
                 $order->getPayment()->getMethodInstance()->reconcile($payment);
                 $queryResponse = $payment->getTransactionAdditionalInfo()[\Magento\Sales\Model\Order\Payment\Transaction::RAW_DETAILS];
-                $this->_paymentManagement->processResponse($order, $queryResponse);
-                $this->messageManager->addSuccessMessage(__('The payment has been reconciled.'));
+                $processResponse = $this->_paymentManagement->processResponse($order, $queryResponse);
+                if ($processResponse) {
+                    $this->messageManager->addSuccessMessage(__('The payment has been reconciled.'));
+                } else {
+                    $this->messageManager->addErrorMessage(__('Invalid response fields. We can\'t reconcile the payment right now.'));
+                }
             } catch (\Magento\Framework\Exception\LocalizedException $e) {
                 $this->messageManager->addErrorMessage($e->getMessage());
             } catch (\Exception $e) {

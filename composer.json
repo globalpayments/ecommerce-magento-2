@@ -1,5 +1,5 @@
 {
-    "name" : "globalpayments/magento2",
+    "name" : "globalpayments/ecommerce-magento-2",
     "description" : "A Magento 2 metapackage for Global Payments modules",
     "type" : "metapackage",
     "version" : "3.0.0",

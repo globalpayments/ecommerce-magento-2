@@ -15,7 +15,7 @@
             "RealexPayments/Googlepay/registration.php"
         ],
         "psr-4" : {
-            "RealexPayments" : "RealexPayments"
+            "RealexPayments\\" : "RealexPayments"
         }
     }
 }

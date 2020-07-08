@@ -47,15 +47,15 @@ class ProcessPaymentToken {
     }
 
     public function getMerchantId() {
-        return $this->getConfigParam('globalpay_merchant_id');
+        return $this->getConfigParam('merchant_id');
     }
 
     public function getAccountId() {
-        return $this->getConfigParam('globalpay_sub_account');
+        return $this->getConfigParam('merchant_account');
     }
 
     public function getSharedSecret() {
-        return $this->_encryptor->decrypt($this->getConfigParam('globalpay_secret'));
+        return $this->_encryptor->decrypt($this->getConfigParam('shared_secret'));
     }
 
     public function getSandboxUrl() {

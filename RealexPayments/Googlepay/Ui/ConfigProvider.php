@@ -27,8 +27,13 @@ final class ConfigProvider implements ConfigProviderInterface
 
     public function getConfigParam($code) {
         $fullConfigPath = 'payment/realexpayments_googlepay/' . $code;
+        $fallBackConfigPath = 'payment/realexpayments_hpp/' . $code;
         $storeScope = \Magento\Store\Model\ScopeInterface::SCOPE_STORE;
-        return $this->scopeConfig->getValue($fullConfigPath, $storeScope);
+        $configParam = $this->scopeConfig->getValue($fullConfigPath, $storeScope);
+        if ( is_null($configParam) ) {
+            $configParam = $this->scopeConfig->getValue($fallBackConfigPath, $storeScope);
+        }
+        return $configParam;
     }
 
     public function getConfig()
@@ -48,7 +53,7 @@ final class ConfigProvider implements ConfigProviderInterface
     }
 
     public function getGlobalpayMerchantId() {
-        return $this->getConfigParam('globalpay_merchant_id');
+        return $this->getConfigParam('merchant_id');
     }
 
     public function getGoogleMerchantName()

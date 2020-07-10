@@ -2,13 +2,8 @@
 <config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="urn:magento:module:Magento_Config:etc/system_file.xsd">
 <system>
     <section id="payment">
-        <group id="realexpayments_applepay_section" translate="label" type="text" sortOrder="101" showInDefault="1" showInWebsite="1" showInStore="1">
-            <label>Global Payments - Apple Pay</label>
-            <comment>
-                <![CDATA[]]>
-            </comment>
-            <group id="realexpayments_applepay_basic" translate="label" showInDefault="1" showInWebsite="1" showInStore="1" sortOrder="5">
-                <label>Global Payments Settings</label>
+            <group id="realexpayments_applepay_apple" translate="label" showInDefault="1" showInWebsite="1" showInStore="1" sortOrder="101">
+                <label>Global Payments - Apple Pay</label>
                 <attribute type="expanded">1</attribute>
                 <field id="active" translate="label" type="select" sortOrder="10" showInDefault="1" showInWebsite="1" showInStore="1">
                     <label>Enabled</label>
@@ -19,56 +14,6 @@
                     <label>Title</label>
                     <config_path>payment/realexpayments_applepay/title</config_path>
                 </field>
-                <field id="globalpay_merchant_id" translate="label" type="text" sortOrder="20" showInDefault="1" showInWebsite="1" showInStore="1">
-                    <label>Merchant Id</label>
-                    <config_path>payment/realexpayments_applepay/globalpay_merchant_id</config_path>
-                </field>
-                <field id="globalpay_sub_account" translate="label" type="text" sortOrder="30" showInDefault="1" showInWebsite="1" showInStore="1">
-                    <label>Sub-Account</label>
-                    <config_path>payment/realexpayments_applepay/globalpay_sub_account</config_path>
-                </field>
-                <field id="globalpay_secret" translate="label" type="obscure" sortOrder="40" showInDefault="1" showInWebsite="1" showInStore="1">
-                    <label>Secret Key</label>
-                    <backend_model>Magento\Config\Model\Config\Backend\Encrypted</backend_model>
-                    <config_path>payment/realexpayments_applepay/globalpay_secret</config_path>
-                </field>
-                <field id="display_at_cart" translate="label" type="select" sortOrder="55" showInDefault="1" showInWebsite="1" showInStore="1">
-                    <label>Display Express payments on Cart</label>
-                    <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
-                    <config_path>payment/realexpayments_applepay/display_at_cart</config_path>
-                </field>
-                <field id="allowspecific" translate="label" type="allowspecific" sortOrder="170" showInDefault="1" showInWebsite="1" showInStore="0" canRestore="1">
-                    <label>Payment from Applicable Countries</label>
-                    <source_model>Magento\Payment\Model\Config\Source\Allspecificcountries</source_model>
-                    <config_path>payment/realexpayments_applepay/allowspecific</config_path>
-                </field>
-                <field id="specificcountry" translate="label" type="multiselect" sortOrder="180" showInDefault="1" showInWebsite="1" showInStore="0">
-                    <label>Payment from Specific Countries</label>
-                    <source_model>Magento\Directory\Model\Config\Source\Country</source_model>
-                    <config_path>payment/realexpayments_applepay/specificcountry</config_path>
-                </field>
-                <field id="live_api_url" translate="label" type="text" sortOrder="150" showInDefault="1" showInWebsite="1" showInStore="1">
-                    <label>Production Remote API URL</label>
-                    <config_path>payment/realexpayments_applepay/live_api_url</config_path>
-                </field>
-                <field id="sandbox_api_url" translate="label" type="text" sortOrder="150" showInDefault="1" showInWebsite="1" showInStore="1">
-                    <label>Sandbox Remote API URL</label>
-                    <config_path>payment/realexpayments_applepay/sandbox_api_url</config_path>
-                </field>
-                <field id="environment" translate="label" type="select" sortOrder="60" showInDefault="1" showInWebsite="1" showInStore="1">
-                    <label>Environment</label>
-                    <source_model>RealexPayments\Applepay\Model\Config\Source\Environment</source_model>
-                    <config_path>payment/realexpayments_applepay/environment</config_path>
-                </field>
-                <field id="debug_log" translate="label" type="select" sortOrder="130" showInDefault="1" showInWebsite="1" showInStore="1">
-                    <label>Enable debug logging</label>
-                    <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
-                    <config_path>payment/realexpayments_applepay/debug_log</config_path>
-                </field>
-            </group>
-            <group id="realexpayments_applepay_apple" translate="label" showInDefault="1" showInWebsite="1" showInStore="1" sortOrder="5">
-                <label>Apple Pay Settings</label>
-                <attribute type="expanded">1</attribute>
                 <field id="merchant_id" translate="label" type="text" sortOrder="10" showInDefault="1" showInWebsite="1" showInStore="1">
                     <label>Apple Merchant Id</label>
                     <config_path>payment/realexpayments_applepay/merchant_id</config_path>
@@ -94,8 +39,17 @@
                     <label>Apple Merchant Display Name</label>
                     <config_path>payment/realexpayments_applepay/merchant_display_name</config_path>
                 </field>
+                <field id="environment" translate="label" type="select" sortOrder="60" showInDefault="1" showInWebsite="1" showInStore="1">
+                    <label>Environment</label>
+                    <source_model>RealexPayments\Applepay\Model\Config\Source\Environment</source_model>
+                    <config_path>payment/realexpayments_applepay/environment</config_path>
+                </field>
+                <field id="debug_log" translate="label" type="select" sortOrder="130" showInDefault="1" showInWebsite="1" showInStore="1">
+                    <label>Enable debug logging</label>
+                    <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
+                    <config_path>payment/realexpayments_applepay/debug_log</config_path>
+                </field>
             </group>
-        </group>
     </section>
 </system>
 </config>

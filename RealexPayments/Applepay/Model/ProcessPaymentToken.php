@@ -42,20 +42,25 @@ class ProcessPaymentToken {
 
     public function getConfigParam($code) {
         $fullConfigPath = 'payment/realexpayments_applepay/' . $code;
+        $fallBackConfigPath = 'payment/realexpayments_hpp/' . $code;
         $storeScope = \Magento\Store\Model\ScopeInterface::SCOPE_STORE;
-        return $this->scopeConfig->getValue($fullConfigPath, $storeScope);
+        $configValue = $this->scopeConfig->getValue($fullConfigPath, $storeScope);
+        if ( is_null($configValue) ) {
+            $configValue = $this->scopeConfig->getValue($fallBackConfigPath, $storeScope);
+        }
+        return $configValue;
     }
 
     public function getMerchantId() {
-        return $this->getConfigParam('globalpay_merchant_id');
+        return $this->getConfigParam('merchant_id');
     }
 
     public function getAccountId() {
-        return $this->getConfigParam('globalpay_sub_account');
+        return $this->getConfigParam('merchant_account');
     }
 
     public function getSharedSecret() {
-        return $this->_encryptor->decrypt($this->getConfigParam('globalpay_secret'));
+        return $this->_encryptor->decrypt($this->getConfigParam('shared_secret'));
     }
 
     public function getSandboxUrl() {

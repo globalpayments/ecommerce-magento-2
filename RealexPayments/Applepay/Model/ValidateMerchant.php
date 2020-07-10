@@ -36,8 +36,13 @@ class ValidateMerchant {
 
     public function getConfigParam($code) {
         $fullConfigPath = 'payment/realexpayments_applepay/' . $code;
+        $fallBackConfigPath = 'payment/realexpayments_hpp/' . $code;
         $storeScope = \Magento\Store\Model\ScopeInterface::SCOPE_STORE;
-        return $this->scopeConfig->getValue($fullConfigPath, $storeScope);
+        $configValue = $this->scopeConfig->getValue($fullConfigPath, $storeScope);
+        if ( is_null($configValue) ) {
+            $configValue = $this->scopeConfig->getValue($fallBackConfigPath, $storeScope);
+        }
+        return $configValue;
     }
 
     public function getEnvironment() {

@@ -3,6 +3,7 @@
     <system>
         <section id="payment">
                 <group id="realexpayments_googlepay_google" translate="label"  showInDefault="1" showInWebsite="1" showInStore="1" sortOrder="101">
+                    <attribute type="expanded">1</attribute>
                     <label>Global Payments - Google Pay</label>
                     <field id="active" translate="label" type="select" sortOrder="10" showInDefault="1" showInWebsite="1" showInStore="1">
                         <label>Enabled</label>
@@ -25,6 +26,11 @@
                         <label>Google Payment Cards</label>
                         <source_model>RealexPayments\Googlepay\Model\Config\Source\PaymentCards</source_model>
                         <config_path>payment/realexpayments_googlepay/google_payment_cards</config_path>
+                    </field>
+                    <field id="environment" translate="label" type="select" sortOrder="60" showInDefault="1" showInWebsite="1" showInStore="1">
+                        <label>Environment</label>
+                        <source_model>RealexPayments\Googlepay\Model\Config\Source\Environment</source_model>
+                        <config_path>payment/realexpayments_googlepay/environment</config_path>
                     </field>
                     <field id="debug_log" translate="label" type="select" sortOrder="130" showInDefault="1" showInWebsite="1" showInStore="1">
                         <label>Enable debug logging</label>

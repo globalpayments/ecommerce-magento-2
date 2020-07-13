@@ -81,4 +81,13 @@ interface RemoteXMLInterface
      * @return bool
      */
     public function holdPayment($payment, $comments);
+
+    /**
+     *  Query the status of a transaction with Realex using the Remote API.
+     *
+     * @param \Magento\Payment\Model\InfoInterface $payment
+     *
+     * @return bool
+     */
+    public function query($payment);
 }

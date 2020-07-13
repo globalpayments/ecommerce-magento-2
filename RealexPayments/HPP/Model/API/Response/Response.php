@@ -2,6 +2,8 @@
 
 namespace RealexPayments\HPP\Model\API\Response;
 
+use RealexPayments\HPP\Model\API\Request\Request;
+
 class Response
 {
     /**
@@ -31,11 +33,14 @@ class Response
     }
 
     /**
-     * @desc Parse the response xml and return this class containing returned fields
+     * @desc Parse the response xml and return this class containing returned fields.
      *
-     * @return this
+     * @param string $response
+     * @param string $requestType
+     *
+     * @return $this|bool
      */
-    public function parse($response)
+    public function parse($response, $requestType)
     {
         if (!isset($response) || empty($response)) {
             return false;
@@ -70,7 +75,11 @@ class Response
         $fieldsToSign = $timestamp.'.'.$this->_array['MERCHANT_ID'].'.'.
             $this->_array['ORDER_ID'].'.'.$this->_array['RESULT'].'.'.$this->_array['MESSAGE'].'.'.
             $this->_array['PASREF'].'.'.$this->_array['AUTHCODE'];
-        $sha1hash = $this->_helper->signFields($fieldsToSign);
+        if (isset($requestType) && ($requestType == Request::TYPE_QUERY)) {
+            $sha1hash = $this->_helper->signQueryFields($fieldsToSign);
+        } else {
+            $sha1hash = $this->_helper->signFields($fieldsToSign);
+        }
 
         //Check to see if hashes match or not
         if ($sha1hash !== $realexsha1){
@@ -87,6 +96,9 @@ class Response
         $this->_array['BATCHID'] = (string) $doc->batchid;
         $this->_array['TIMETAKEN'] = (string) $doc->timetaken;
         $this->_array['AUTHTIMETAKEN'] = (string) $doc->authtimetaken;
+        if (isset($doc->cardnumber)) {
+            $this->_array['CARDNUMBER'] = (string) $doc->cardnumber;
+        }
 
         return $this;
     }

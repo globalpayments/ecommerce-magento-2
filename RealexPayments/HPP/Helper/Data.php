@@ -144,6 +144,21 @@ class Data extends AbstractHelper
     }
 
     /**
+     * @desc Sign query fields.
+     *
+     * @param string $fields
+     *
+     * @return string
+     */
+    public function signQueryFields($fields)
+    {
+        $sha1hash = sha1($fields);
+        $tmp = "$sha1hash. ";
+
+        return sha1($tmp);
+    }
+
+    /**
      * @desc Check if configuration is set to sandbox mode
      *
      * @return bool

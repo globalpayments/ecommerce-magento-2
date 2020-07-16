@@ -27,8 +27,13 @@ final class ConfigProvider implements ConfigProviderInterface
 
     public function getConfigParam($code) {
         $fullConfigPath = 'payment/realexpayments_applepay/' . $code;
+        $fallBackConfigPath = 'payment/realexpayments_hpp/' . $code;
         $storeScope = \Magento\Store\Model\ScopeInterface::SCOPE_STORE;
-        return $this->scopeConfig->getValue($fullConfigPath, $storeScope);
+        $configValue = $this->scopeConfig->getValue($fullConfigPath, $storeScope);
+        if ( is_null($configValue) ) {
+            $configValue = $this->scopeConfig->getValue($fallBackConfigPath, $storeScope);
+        }
+        return $configValue;
     }
 
     public function getConfig()
@@ -36,7 +41,7 @@ final class ConfigProvider implements ConfigProviderInterface
         return [
             'payment' => [
                 self::CODE => [
-                    'globalpay_merchant_id' => $this->getGlobalpayMerchantId(),
+                    'merchant_id' => $this->getGlobalpayMerchantId(),
                     'sandbox' => $this->getIsSandbox(),
                     'success_action' => $this->getActionSuccess(),
                 ]
@@ -45,7 +50,7 @@ final class ConfigProvider implements ConfigProviderInterface
     }
 
     public function getGlobalpayMerchantId() {
-        return $this->getConfigParam('globalpay_merchant_id');
+        return $this->getConfigParam('merchant_id');
     }
 
     public function getActionSuccess()

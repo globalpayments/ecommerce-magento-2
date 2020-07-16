@@ -84,7 +84,7 @@ class ApplePayButton extends Template
 
     public function getMerchantId()
     {
-        return $this->getConfigParam('globalpay_merchant_id');
+        return $this->getConfigParam('merchant_id');
     }
 
     public function getActionSuccess()

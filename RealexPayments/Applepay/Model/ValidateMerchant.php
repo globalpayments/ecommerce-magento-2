@@ -61,7 +61,7 @@ class ValidateMerchant {
     }
 
     public function getAppleMerchantId() {
-        return $this->getConfigParam('merchant_id');
+        return $this->getConfigParam('apple_merchant_id');
     }
 
     public function getAppleMerchantPemPath() {

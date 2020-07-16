@@ -16,7 +16,7 @@
                 </field>
                 <field id="merchant_id" translate="label" type="text" sortOrder="10" showInDefault="1" showInWebsite="1" showInStore="1">
                     <label>Apple Merchant Id</label>
-                    <config_path>payment/realexpayments_applepay/merchant_id</config_path>
+                    <config_path>payment/realexpayments_applepay/apple_merchant_id</config_path>
                 </field>
                 <field id="merchant_pem" translate="label" type="text" sortOrder="10" showInDefault="1" showInWebsite="1" showInStore="1">
                     <label>Apple Merchant Cert Path</label>

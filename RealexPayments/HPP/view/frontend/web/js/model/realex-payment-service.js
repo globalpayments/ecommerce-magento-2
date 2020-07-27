@@ -42,7 +42,7 @@ define(
                 }
             },
             iframeResize: function(event) {
-                var data = JSON.parse(event);
+                var data = (typeof event !== 'object') ? JSON.parse(event) : event;
                 if (data.iframe && window.checkoutConfig.payment[quote.paymentMethod().method].iframeEnabled === '1') {
                     if (this.iframeHeight() != data.iframe.height && data.iframe.height != '0px') {
                         this.iframeHeight(data.iframe.height);

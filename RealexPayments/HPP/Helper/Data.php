@@ -3,6 +3,7 @@
 namespace RealexPayments\HPP\Helper;
 
 use Magento\Framework\App\Helper\AbstractHelper;
+use Magento\Sales\Api\Data\OrderInterface;
 use RealexPayments\HPP\Model\Config\Source\Environment;
 
 /**
@@ -313,7 +314,7 @@ class Data extends AbstractHelper
     /**
      * @desc Cancels the order
      *
-     * @param \Magento\Sales\Mode\Order $order
+     * @param \Magento\Sales\Model\Order $order
      */
     public function cancelOrder($order)
     {
@@ -532,6 +533,16 @@ class Data extends AbstractHelper
     }
 
     /**
+     * @return bool
+     */
+    public function isApmEnabled() {
+        // if apm is gonna be controlled via a shop setting at some point
+        // pending transactions that did not receive a final status by the time the setting was turned off won't be processed
+
+        return true;
+    }
+
+    /**
      * @desc Gives back configuration values as flag
      *
      * @param $field
@@ -598,5 +609,18 @@ class Data extends AbstractHelper
         }
 
         return trim($responseUrl, '/');
+    }
+
+    /**
+     * @param OrderInterface $order
+     *
+     * @return bool
+     */
+    public function isOrderPendingPayment($order)
+    {
+        return array_key_exists(
+                $order->getStatus(),
+                $order->getConfig()->getStateStatuses(\Magento\Sales\Model\Order::STATE_PENDING_PAYMENT)
+            );
     }
 }

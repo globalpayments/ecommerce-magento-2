@@ -378,9 +378,14 @@ class PaymentMethod extends \Magento\Payment\Model\Method\AbstractMethod impleme
                 }
             }
             $billingPostalCode = $postalBit . '|' . $addresBit;
+            /** @var \Magento\Sales\Model\Order $order */
+            $billingFirstName = $order->getBillingAddress()->getFirstName();
+            $billingLastName  = $order->getBillingAddress()->getLastname();
         } else {
             $billingCountryCode = '';
             $billingPostalCode = '';
+            $billingFirstName = '';
+            $billingLastName = '';
         }
         if ($order->getShippingAddress()) {
             $shippingCountryCode = $order->getShippingAddress()->getCountryId();
@@ -545,6 +550,13 @@ class PaymentMethod extends \Magento\Payment\Model\Method\AbstractMethod impleme
         }
 
         $additionalHppData["COMMENT1"] = 'magento2';
+
+        if ($this->_helper->isApmEnabled()) {
+            $additionalHppData["HPP_CUSTOMER_COUNTRY"]   = $billingCountryCode;
+            $additionalHppData["HPP_CUSTOMER_FIRSTNAME"] = $billingFirstName;
+            $additionalHppData["HPP_CUSTOMER_LASTNAME"]  = $billingLastName;
+            $additionalHppData["HPP_TX_STATUS_URL"]      = $this->_helper->getMerchantBaseResponseUrl() . '/realexpayments_hpp/apm/result';
+        }
 
         foreach ($additionalHppData as $additionalHppProp => $additionalHppValue) {
             if (is_array($additionalHppValue)) {

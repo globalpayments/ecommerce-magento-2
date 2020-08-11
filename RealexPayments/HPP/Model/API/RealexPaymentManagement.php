@@ -2,6 +2,9 @@
 
 namespace RealexPayments\HPP\Model\API;
 
+use Magento\Sales\Api\Data\OrderInterface;
+use Magento\Sales\Api\OrderRepositoryInterface;
+use Magento\Sales\Model\Order;
 use RealexPayments\HPP\Model\Config\Source\SettleMode;
 
 class RealexPaymentManagement implements \RealexPayments\HPP\API\RealexPaymentManagementInterface
@@ -49,6 +52,9 @@ class RealexPaymentManagement implements \RealexPayments\HPP\API\RealexPaymentMa
      */
     private $_customerRepository;
 
+    /** @var OrderRepositoryInterface */
+    private $_orderRepository;
+
     /**
      * RealexPaymentManagement constructor.
      *
@@ -60,6 +66,7 @@ class RealexPaymentManagement implements \RealexPayments\HPP\API\RealexPaymentMa
      * @param \Magento\Sales\Model\Order\Email\Sender\OrderSender             $orderSender
      * @param \Magento\Sales\Model\Order\Status\HistoryFactory                $orderHistoryFactory
      * @param \Magento\Customer\Api\CustomerRepositoryInterface               $customerRepository
+     * @param \Magento\Sales\Model\OrderRepository                            $orderRepository
      */
     public function __construct(
         \RealexPayments\HPP\Helper\Data $helper,
@@ -69,7 +76,8 @@ class RealexPaymentManagement implements \RealexPayments\HPP\API\RealexPaymentMa
         \RealexPayments\HPP\Logger\Logger $logger,
         \Magento\Sales\Model\Order\Email\Sender\OrderSender $orderSender,
         \Magento\Sales\Model\Order\Status\HistoryFactory $orderHistoryFactory,
-        \Magento\Customer\Api\CustomerRepositoryInterface $customerRepository
+        \Magento\Customer\Api\CustomerRepositoryInterface $customerRepository,
+        \Magento\Sales\Model\OrderRepository $orderRepository
     ) {
         $this->_helper = $helper;
         $this->_session = $session;
@@ -79,6 +87,7 @@ class RealexPaymentManagement implements \RealexPayments\HPP\API\RealexPaymentMa
         $this->_orderHistoryFactory = $orderHistoryFactory;
         $this->_customerRepository = $customerRepository;
         $this->_remoteXml = $remoteXml;
+        $this->_orderRepository = $orderRepository;
     }
 
     /**
@@ -107,10 +116,7 @@ class RealexPaymentManagement implements \RealexPayments\HPP\API\RealexPaymentMa
         $settleMode = $this->_helper->getConfigData('settle_mode', $order->getStoreId());
         $isAutoSettle = $settleMode == SettleMode::SETTLEMODE_AUTO;
 
-        $confirmedPaymentStatus = $this->_helper->getConfigData('payment_successful', $order->getStoreId());
-        if (empty($confirmedPaymentStatus)) {
-            $confirmedPaymentStatus = $order->getConfig()->getStateDefaultStatus(\Magento\Sales\Model\Order::STATE_PROCESSING);
-        }
+        $confirmedPaymentStatus = $this->getDefaultPaymentSuccessfulStatus($order);
 
         //Set information
         $payment->setTransactionId($pasref);
@@ -157,6 +163,84 @@ class RealexPaymentManagement implements \RealexPayments\HPP\API\RealexPaymentMa
         return true;
     }
 
+    /**
+     * @param OrderInterface|Order $order
+     * @param array                $response
+     *
+     * @return bool
+     * @throws \Exception
+     */
+    public function processResponseApm($order, $response) {
+        if (!$this->_helper->isApmEnabled()) return false;
+        if (!$this->_helper->isOrderPendingPayment($order)) return false;
+
+        $payment = $order->getPayment();
+
+        // only 00/successful should be a final result in APM too, in this particular case (Status URL updates)
+        $isValidResponse = !(
+            $response == null ||
+            !isset($response['result']) ||
+            !isset($response['pasref']) ||
+            !in_array($response['result'], ['00'])
+        );
+
+        if (!$isValidResponse) {
+            try {
+                $this->_helper->setAdditionalInfo($payment, $response);
+                $this->_orderRepository->save($order);
+
+                $this->_helper->cancelOrder($order);
+            } catch (\Exception $e) {
+                $this->_logger->critical($e->getMessage());
+            }
+
+            $this->_logger->critical("Async - Response fields couldn't be validated");
+            return false;
+        }
+
+        $pasref = $response['pasref'];
+
+        $settleMode = $this->_helper->getConfigData('settle_mode', $order->getStoreId());
+        $isAutoSettle = $settleMode == SettleMode::SETTLEMODE_AUTO;
+
+        $confirmedPaymentStatus = $this->getDefaultPaymentSuccessfulStatus($order);
+
+        //Set information
+        $payment->setTransactionId($pasref);
+        $this->_helper->setAdditionalInfo($payment, $response);
+        $payment->setAdditionalInformation('AUTO_SETTLE_FLAG', $settleMode);
+
+        //Add order Transaction
+        $this->_addTransaction($payment, $order, $pasref, $response, $isAutoSettle);
+
+        //place payment
+        $payment
+            ->getMethodInstance()
+            ->setIsInitializeNeeded(false);
+
+        $payment->place();
+
+        //Write comment
+        $this->_paymentIsAuthorised($order, $pasref, $order->getTotalDue());
+
+        //Should we invoice
+        if ($isAutoSettle) {
+            $this->_invoice($order, $pasref, $order->getBaseGrandTotal());
+        }
+
+        $order
+            ->setState(\Magento\Sales\Model\Order::STATE_PROCESSING)
+            ->setStatus($confirmedPaymentStatus);
+
+        $this->_orderRepository->save($order);
+        //Send order email
+        if (!$order->getEmailSent()) {
+            $this->_orderSender->send($order);
+        }
+
+        return true;
+    }
+
     private function checkFraud($response, $payment, $isAutoSettle, $pasref, $amount)
     {
         $fraud = false;
@@ -187,6 +271,20 @@ class RealexPaymentManagement implements \RealexPayments\HPP\API\RealexPaymentMa
     }
 
     /**
+     * @param Order $order
+     *
+     * @return bool|mixed
+     */
+    public function getDefaultPaymentSuccessfulStatus($order) {
+        $confirmedPaymentStatus = $this->_helper->getConfigData('payment_successful', $order->getStoreId());
+        if (empty($confirmedPaymentStatus)) {
+            $confirmedPaymentStatus = $order->getConfig()->getStateDefaultStatus(\Magento\Sales\Model\Order::STATE_PROCESSING);
+        }
+
+        return $confirmedPaymentStatus;
+    }
+
+    /**
      * {@inheritdoc}
      */
     public function restoreCart($cartId)
@@ -204,7 +302,7 @@ class RealexPaymentManagement implements \RealexPayments\HPP\API\RealexPaymentMa
     /**
      * @desc Create an invoice
      *
-     * @param \Magento\Sales\Mode\Order $order
+     * @param \Magento\Sales\Model\Order $order
      * @param string                    $pasref
      * @param string                    $amount
      */
@@ -320,7 +418,7 @@ class RealexPaymentManagement implements \RealexPayments\HPP\API\RealexPaymentMa
     /**
      * @desc Called after payment is authorised
      *
-     * @param \Magento\Sales\Mode\Order $order
+     * @param \Magento\Sales\Model\Order $order
      * @param string                    $pasref
      * @param string                    $amount
      */
@@ -335,9 +433,18 @@ class RealexPaymentManagement implements \RealexPayments\HPP\API\RealexPaymentMa
     }
 
     /**
+     * @param OrderInterface|Order $order
+     * @param string         $message
+     */
+    public function addHistoryComment($order, $message)
+    {
+        $this->_addHistoryComment($order, $message);
+    }
+
+    /**
      * @desc Add a comment to order history
      *
-     * @param \Magento\Sales\Mode\Order $order
+     * @param \Magento\Sales\Model\Order $order
      * @param string                    $message
      */
     private function _addHistoryComment($order, $message)
@@ -359,11 +466,13 @@ class RealexPaymentManagement implements \RealexPayments\HPP\API\RealexPaymentMa
      */
     private function _validateResponseFields($response)
     {
+        // 01 means pending in terms of APM and is a valid result code
+        $successfulResultCodes = $this->isTransactionApm($response) ? ['00', '01'] : ['00'];
         if ($response == null ||
            !isset($response['RESULT']) ||
            !isset($response['PASREF']) ||
            !isset($response['AMOUNT']) ||
-           $response['RESULT'] != '00' ||
+           !in_array($response['RESULT'], $successfulResultCodes) ||
            !ctype_digit($response['AMOUNT'])) {
             return false;
         }
@@ -372,10 +481,19 @@ class RealexPaymentManagement implements \RealexPayments\HPP\API\RealexPaymentMa
     }
 
     /**
+     * @param $response
+     *
+     * @return bool
+     */
+    public function isTransactionApm($response) {
+        return $this->_helper->isApmEnabled() && !isset($response['AUTHCODE']);
+    }
+
+    /**
      * @desc Add order transaction
      *
-     * @param \Magento\Sales\Mode\Order\Payment $payment
-     * @param \Magento\Sales\Mode\Order         $order
+     * @param \Magento\Sales\Model\Order\Payment $payment
+     * @param \Magento\Sales\Model\Order         $order
      * @param string                            $pasref
      * @param array                             $response
      */

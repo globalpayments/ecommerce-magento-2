@@ -229,13 +229,30 @@ class RemoteXML implements \RealexPayments\HPP\API\RemoteXMLInterface
     }
 
     /**
+     * {@inheritdoc}
+     */
+    public function query($payment)
+    {
+        $additional = $payment->getAdditionalInformation();
+        $request = $this->_requestFactory->create()
+            ->setType(Request\Request::TYPE_QUERY)
+            ->setMerchantId($additional['MERCHANT_ID'])
+            ->setOrderId($additional['ORDER_ID'])
+            ->setAccount($additional['ACCOUNT'])
+            ->build();
+
+        return $this->_sendRequest($request, Request\Request::TYPE_QUERY);
+    }
+
+    /**
      * @desc Send the request to the remote xml api
      *
      * @param \RealexPayments\HPP\Model\API\Request\Request $request
+     * @param string                                        $requestType
      *
      * @return \RealexPayments\HPP\Model\API\Response\Response
      */
-    private function _sendRequest($request)
+    private function _sendRequest($request, $requestType = '')
     {
         $url = $this->_helper->getRemoteApiUrl();
         $curl = curl_init();
@@ -256,7 +273,7 @@ class RemoteXML implements \RealexPayments\HPP\API\RemoteXMLInterface
             return false;
         }
 
-        return $this->_responseFactory->create()->parse($response);
+        return $this->_responseFactory->create()->parse($response, $requestType);
     }
 
     private function _getTransaction($payment)

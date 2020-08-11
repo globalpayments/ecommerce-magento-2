@@ -1464,4 +1464,39 @@ class PaymentMethod extends \Magento\Payment\Model\Method\AbstractMethod impleme
 
         return $this;
     }
+
+    /**
+     * Reconcile order.
+     *
+     * @param \Magento\Payment\Model\InfoInterface $payment
+     *
+     * @return $this
+     *
+     * @throws \Magento\Framework\Exception\LocalizedException
+     */
+    public function reconcile(\Magento\Payment\Model\InfoInterface $payment)
+    {
+        $additionalInfo = $payment->getAdditionalInformation();
+        $response = $this->_remoteXml->query($payment);
+
+        if (!isset($response) || !$response) {
+            throw new \Magento\Framework\Exception\LocalizedException(__('The reconcile action failed'));
+        }
+        $fields = $response->toArray();
+        $fields['AMOUNT'] = $additionalInfo['AMOUNT'];
+        if ($fields['RESULT'] != '00') {
+            throw new \Magento\Framework\Exception\LocalizedException(
+                __(
+                    'The reconcile action failed. Gateway Response - Error ' . $fields['RESULT'] . ': ' .
+                    $fields['MESSAGE']
+                )
+            );
+        }
+
+        $payment->setTransactionId($fields['PASREF'])
+            ->setParentTransactionId($payment->getAdditionalInformation('PASREF'))
+            ->setTransactionAdditionalInfo(\Magento\Sales\Model\Order\Payment\Transaction::RAW_DETAILS, $fields);
+
+        return $this;
+    }
 }

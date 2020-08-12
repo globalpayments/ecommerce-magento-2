@@ -146,21 +146,21 @@ class Result extends Action implements CsrfAwareActionInterface
         //get the actual order id
         [$incrementId, $orderTimestamp] = explode('_', $response['orderid']);
 
-        if ($incrementId) {
-            $order = $this->_getOrder($incrementId);
-            if ($order->getId()) {
-                // process the response
-                return $this->_paymentManagement->processResponseApm($order, $response);
-            } else {
-                $this->_logger->critical(__('Async - Gateway response has an invalid order id.'));
-
-                return false;
-            }
-        } else {
+        if (!$incrementId) {
             $this->_logger->critical(__('Async - Gateway response does not have an order id.'));
 
             return false;
         }
+
+        $order = $this->_getOrder($incrementId);
+        if (!$order->getId()) {
+            $this->_logger->critical(__('Async - Gateway response has an invalid order id.'));
+
+            return false;
+        }
+
+        // process the response
+        return $this->_paymentManagement->processResponseApm($order, $response);
     }
 
     /**

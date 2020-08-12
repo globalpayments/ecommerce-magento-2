@@ -51,13 +51,19 @@ class StatusFetcher extends Action
 
         $orderId = $request->getParam('order_id', false);
 
-        if ($orderId === false) throw new NotFoundException(new Phrase("'order_id' is mandatory"));
+        if ($orderId === false) {
+            throw new NotFoundException(new Phrase("'order_id' is mandatory"));
+        }
         /** @noinspection PhpPossiblePolymorphicInvocationInspection */
-        if (!$request->isAjax()) throw new NotFoundException(new Phrase("Trying to access URL in non-AJAX context"));
+        if (!$request->isAjax()) {
+            throw new NotFoundException(new Phrase("Trying to access URL in non-AJAX context"));
+        }
 
         $order = $this->_orderRepository->get($orderId);
 
-        if (!$order) throw new NotFoundException(new Phrase("Order couldn't be found"));
+        if (!$order) {
+            throw new NotFoundException(new Phrase("Order couldn't be found"));
+        }
 
         $isPendingPayment = $this->_helper->isOrderPendingPayment($order);
         $orderStatus      = $order->getStatus();

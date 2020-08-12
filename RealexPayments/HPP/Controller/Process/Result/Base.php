@@ -129,44 +129,46 @@ class Base extends \Magento\Framework\App\Action\Action
         //get the actual order id
         [$incrementId, $orderTimestamp] = explode('_', $response['ORDER_ID']);
 
-        if ($incrementId) {
-            $order = $this->_getOrder($incrementId);
-            if ($order->getId()) {
-                // skip default response processing if APM
-                if ($this->_paymentManagement->isTransactionApm($response)) {
-                    $fieldsToLog       = $this->_helper->stripFields($response);
-                    $fieldsToLogString = '<b>Initial response</b> <br />';
-                    $fieldsToLogList   = [
-                        'RESULT',
-                        'MESSAGE',
-                        'PASREF',
-                        'ORDER_ID',
-                        'TIMESTAMP',
-                        'AMOUNT',
-                        'HPP_APM_DESCRIPTOR',
-                        'PAYMENTMETHOD'
-                    ];
-                    foreach ($fieldsToLog as $fieldToLogKey => $fieldToLogValue) {
-                        if (!in_array($fieldToLogKey, $fieldsToLogList)) continue;
-
-                        $fieldsToLogString .= htmlspecialchars("{$fieldToLogKey}: {$fieldToLogValue}", ENT_QUOTES, 'UTF-8') . "<br />";
-                    }
-                    $this->_paymentManagement->addHistoryComment($order, $fieldsToLogString);
-                    return true;
-                }
-
-                // process the response
-                return $this->_paymentManagement->processResponse($order, $response);
-            } else {
-                $this->_logger->critical(__('Gateway response has an invalid order id.'));
-
-                return false;
-            }
-        } else {
+        if (!$incrementId) {
             $this->_logger->critical(__('Gateway response does not have an order id.'));
 
             return false;
         }
+
+        $order = $this->_getOrder($incrementId);
+        if (!$order->getId()) {
+            $this->_logger->critical(__('Gateway response has an invalid order id.'));
+
+            return false;
+        }
+
+        if (!$this->_paymentManagement->isTransactionApm($response)) {
+            // process the response
+            return $this->_paymentManagement->processResponse($order, $response);
+        }
+
+        // apm scenario
+        $fieldsToLog       = $this->_helper->stripFields($response);
+        $fieldsToLogString = '<b>Initial response</b> <br />';
+        $fieldsToLogList   = [
+            'RESULT',
+            'MESSAGE',
+            'PASREF',
+            'ORDER_ID',
+            'TIMESTAMP',
+            'AMOUNT',
+            'HPP_APM_DESCRIPTOR',
+            'PAYMENTMETHOD'
+        ];
+        foreach ($fieldsToLog as $fieldToLogKey => $fieldToLogValue) {
+            if (!in_array($fieldToLogKey, $fieldsToLogList)) {
+                continue;
+            }
+
+            $fieldsToLogString .= htmlspecialchars("{$fieldToLogKey}: {$fieldToLogValue}", ENT_QUOTES, 'UTF-8') . "<br />";
+        }
+        $this->_paymentManagement->addHistoryComment($order, $fieldsToLogString);
+        return true;
     }
 
     /**

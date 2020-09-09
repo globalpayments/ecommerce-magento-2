@@ -40,6 +40,25 @@ class Info extends \Magento\Payment\Block\Info
         $cavv = $this->getInfo()->getAdditionalInformation('CAVV');
         $xid = $this->getInfo()->getAdditionalInformation('XID');
 
+
+        // APM fields begin
+        $apmFields = [
+            'orderid'       => 'Order ID',
+            'timestamp'     => 'Timestamp',
+            'result'        => 'Result',
+            'message'       => 'Message',
+            'pasref'        => 'Pasref',
+            'paymentmethod' => 'Payment Method',
+            'fundsstatus'   => 'Fund status',
+        ];
+
+        foreach ($apmFields as $apmField => $apmFieldLabel) {
+            $apmValueToDisplay = $this->getInfo()->getAdditionalInformation($apmField);
+            $data = $this->checkAndSet($data, $apmValueToDisplay, $apmFieldLabel);
+        }
+        // APM fields end
+
+
         $data = $this->checkAndSet($data, $orderId, 'Order Id');
         $data = $this->checkAndSet($data, $cardType, 'Card Type');
         $data = $this->checkAndSet($data, $paymentMethod, 'Payment Method');

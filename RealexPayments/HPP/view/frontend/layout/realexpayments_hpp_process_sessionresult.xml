@@ -1,0 +1,6 @@
+<?xml version="1.0"?>
+<layout xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="urn:magento:framework:View/Layout/etc/layout_generic.xsd">
+    <container name="root">
+        <block class="RealexPayments\HPP\Block\Process\SessionResult" name="realexpayments-hpp-process-sessionresult" template="process/sessionresult.phtml" cacheable="false"/>
+    </container>
+</layout>

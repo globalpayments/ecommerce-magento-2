@@ -30,6 +30,58 @@
                                                                 </item>
                                                             </item>
                                                         </item>
+                                                        <item name="payments-list" xsi:type="array">
+                                                            <item name="children" xsi:type="array">
+                                                                <item name="realexpayments_hpp-form" xsi:type="array">
+                                                                    <item name="children" xsi:type="array">
+                                                                        <item name="form-fields" xsi:type="array">
+                                                                            <item name="children" xsi:type="array">
+                                                                                <item name="firstname" xsi:type="array">
+                                                                                    <item name="validation" xsi:type="array">
+                                                                                        <item name="required-entry" xsi:type="array">
+                                                                                            <item name="validate" xsi:type="boolean">true</item>
+                                                                                        </item>
+                                                                                        <item name="pattern" xsi:type="array">
+                                                                                            <item name="validate" xsi:type="boolean">true</item>
+                                                                                            <item name="value" xsi:type="string">/^[A-Za-z0-9\xC0-\xD6\xD8-\xf6\xf8-\xff\[\]\/\.\-\"_',\s]+$/</item>
+                                                                                            <item name="message" xsi:type="string">Letters, numbers, spaces or punctuation only please</item>
+                                                                                        </item>
+                                                                                        <item name="validate-length" xsi:type="array">
+                                                                                            <item name="max_text_length" xsi:type="number">60</item>
+                                                                                        </item>
+                                                                                    </item>
+                                                                                </item>
+                                                                                <item name="lastname" xsi:type="array">
+                                                                                    <item name="validation" xsi:type="array">
+                                                                                        <item name="required-entry" xsi:type="array">
+                                                                                            <item name="validate" xsi:type="boolean">true</item>
+                                                                                        </item>
+                                                                                        <item name="pattern" xsi:type="array">
+                                                                                            <item name="validate" xsi:type="boolean">true</item>
+                                                                                            <item name="value" xsi:type="string">/^[A-Za-z0-9\xC0-\xD6\xD8-\xf6\xf8-\xff\[\]\/\.\-\"_',\s]+$/</item>
+                                                                                            <item name="message" xsi:type="string">Letters, numbers, spaces or punctuation only please</item>
+                                                                                        </item>
+                                                                                        <item name="validate-length" xsi:type="array">
+                                                                                            <item name="max_text_length" xsi:type="number">60</item>
+                                                                                        </item>
+                                                                                    </item>
+                                                                                </item>
+                                                                            </item>
+                                                                        </item>
+
+                                                                    </item>
+                                                                </item>
+                                                            </item>
+                                                        </item>
+                                                        <item name="additional-payment-validators" xsi:type="array">
+                                                            <item name="children" xsi:type="array">
+                                                                <!-- Declare your validation. START -->
+                                                                <item name="realexpayments_hpp_validation" xsi:type="array">
+                                                                    <item name="component" xsi:type="string">RealexPayments_HPP/js/view/validation</item>
+                                                                </item>
+                                                                <!-- Declare your validation. END -->
+                                                            </item>
+                                                        </item>
                                                     </item>
                                                 </item>
                                             </item>

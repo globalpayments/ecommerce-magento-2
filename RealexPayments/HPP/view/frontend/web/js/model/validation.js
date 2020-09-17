@@ -8,16 +8,25 @@ define(
         'use strict';
         return {
             validate: function () {
-                var shippingAddress = quote.shippingAddress();
+                var shippingAddress = quote.shippingAddress(),
+                    billingAddress = quote.billingAddress();
 
                 var isValid = true;
 
                 if (!this.isValidName(shippingAddress.firstname ||
                     !this.isValidName(shippingAddress.lastname)) ||
-                    !this.isValidShippingStreet(shippingAddress.street)) {
+                    !this.isValidAddress(shippingAddress.street)) {
                     isValid = false;
                     messageList.addErrorMessage({
                         message: $t('Please check the following fields: First name, Last name and Shipping address. ' +
+                            'The selected payment method only allows letters, numbers, spaces or punctuation only, and no more than 50 characters.')
+                    });
+                }
+
+                if (!this.isValidAddress(billingAddress.street)) {
+                    isValid = false;
+                    messageList.addErrorMessage({
+                        message: $t('Please check the Billing address. ' +
                             'The selected payment method only allows letters, numbers, spaces or punctuation only, and no more than 50 characters.')
                     });
                 }
@@ -44,17 +53,17 @@ define(
             },
 
             /**
-             * Validate shipping street
+             * Validate address
              *
-             * @param {Array} shippingStreet
+             * @param {Array} address
              * @return {Boolean}
              */
-            isValidShippingStreet: function (shippingStreet) {
+            isValidAddress: function (address) {
                 var isValid = true;
 
                 let pattern = /([^A-Za-z0-9\xC0-\xD6\xD8-\xf6\xf8-\xff\/\.\-_',\s])+/u;
 
-                shippingStreet.forEach(function (item) {
+                address.forEach(function (item) {
                     if (pattern.test(item) || item.length>50) {
                         isValid = false;
 

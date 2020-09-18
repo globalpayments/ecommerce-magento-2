@@ -3,7 +3,6 @@
 namespace RealexPayments\HPP\Controller\Process\Result;
 
 use Amazon\Payment\Model\PaymentManagement;
-use Magento\Sales\Model\Order\Email\Sender\OrderSender;
 
 class Base extends \Magento\Framework\App\Action\Action
 {
@@ -25,7 +24,7 @@ class Base extends \Magento\Framework\App\Action\Action
     /**
      * Core registry.
      *
-     * @var \Magento\Framework\Registry\Registry
+     * @var \Magento\Framework\Registry
      */
     private $coreRegistry;
 
@@ -40,34 +39,26 @@ class Base extends \Magento\Framework\App\Action\Action
     private $_paymentManagement;
 
     /**
-     * @var OrderSender
-     */
-    private $_orderSender;
-
-    /**
      * Result constructor.
      *
-     * @param \Magento\Framework\App\Action\Context                    $context
-     * @param \RealexPayments\HPP\Helper\Data                          $helper
-     * @param \Magento\Framework\Registry                              $coreRegistry
-     * @param \RealexPayments\HPP\Logger\Logger                        $logger
-     * @param \RealexPayments\HPP\API\RealexPaymentManagementInterface $paymentManagement
-     * @param OrderSender                                              $orderSender
+     * @param  \Magento\Framework\App\Action\Context  $context
+     * @param  \RealexPayments\HPP\Helper\Data  $helper
+     * @param  \Magento\Framework\Registry  $coreRegistry
+     * @param  \RealexPayments\HPP\Logger\Logger  $logger
+     * @param  \RealexPayments\HPP\API\RealexPaymentManagementInterface  $paymentManagement
      */
     public function __construct(
         \Magento\Framework\App\Action\Context $context,
         \RealexPayments\HPP\Helper\Data $helper,
         \Magento\Framework\Registry $coreRegistry,
         \RealexPayments\HPP\Logger\Logger $logger,
-        \RealexPayments\HPP\API\RealexPaymentManagementInterface $paymentManagement,
-        OrderSender $orderSender
+        \RealexPayments\HPP\API\RealexPaymentManagementInterface $paymentManagement
     ) {
         $this->_helper = $helper;
         $this->_url = $context->getUrl();
         $this->coreRegistry = $coreRegistry;
         $this->_logger = $logger;
         $this->_paymentManagement = $paymentManagement;
-        $this->_orderSender = $orderSender;
         parent::__construct($context);
     }
 
@@ -84,7 +75,8 @@ class Base extends \Magento\Framework\App\Action\Action
             if ($response) {
                 $result = $this->_handleResponse($response);
                 $params['returnUrl'] = $this->_url
-                  ->getUrl('realexpayments_hpp/process/sessionresult', $this->_buildSessionParams($result, $response));
+                    ->getUrl('realexpayments_hpp/process/sessionresult',
+                        $this->_buildSessionParams($result, $response));
             }
         } catch (\Exception $e) {
             $this->_logger->critical($e);
@@ -97,7 +89,7 @@ class Base extends \Magento\Framework\App\Action\Action
     }
 
     /**
-     * @param array $response
+     * @param  array  $response
      *
      * @return bool
      */
@@ -140,9 +132,9 @@ class Base extends \Magento\Framework\App\Action\Action
         }
 
         // apm scenario
-        $fieldsToLog       = $this->_helper->stripFields($response);
+        $fieldsToLog = $this->_helper->stripFields($response);
         $fieldsToLogString = '<b>Initial response</b> <br />';
-        $fieldsToLogList   = [
+        $fieldsToLogList = [
             'RESULT',
             'MESSAGE',
             'PASREF',
@@ -157,7 +149,8 @@ class Base extends \Magento\Framework\App\Action\Action
                 continue;
             }
 
-            $fieldsToLogString .= htmlspecialchars("{$fieldToLogKey}: {$fieldToLogValue}", ENT_QUOTES, 'UTF-8') . "<br />";
+            $fieldsToLogString .= htmlspecialchars("{$fieldToLogKey}: {$fieldToLogValue}", ENT_QUOTES,
+                    'UTF-8')."<br />";
         }
         $this->_paymentManagement->addHistoryComment($order, $fieldsToLogString);
         return true;
@@ -166,7 +159,7 @@ class Base extends \Magento\Framework\App\Action\Action
     /**
      * Validate response using sha1 signature.
      *
-     * @param array $response
+     * @param  array  $response
      *
      * @return bool
      */
@@ -188,7 +181,7 @@ class Base extends \Magento\Framework\App\Action\Action
         }
 
         //Check to see if hashes match or not
-        if ($sha1hash !== $realexsha1){
+        if ($sha1hash !== $realexsha1) {
             return false;
         }
 
@@ -198,9 +191,9 @@ class Base extends \Magento\Framework\App\Action\Action
     /**
      * Build params for the session redirect.
      *
-     * @param bool  $result
+     * @param  bool  $result
      *
-     * @param array $response
+     * @param  array  $response
      *
      * @return array|bool
      */
@@ -213,15 +206,20 @@ class Base extends \Magento\Framework\App\Action\Action
 
         // if no order id exists
         if (!$this->_order) {
-          return false;
-        }
-        else {
+            return false;
+        } else {
             $orderid = $this->_order->getIncrementId();
         }
 
         $sha1hash = $this->_helper->signFields("$timestamp.$merchantid.$orderid.$result");
 
-        return ['timestamp' => $timestamp, 'order_id' => $orderid, 'result' => $result, 'hash' => $sha1hash, 'apm_pending' => $isApmPending];
+        return [
+            'timestamp' => $timestamp,
+            'order_id' => $orderid,
+            'result' => $result,
+            'hash' => $sha1hash,
+            'apm_pending' => $isApmPending
+        ];
     }
 
     /**

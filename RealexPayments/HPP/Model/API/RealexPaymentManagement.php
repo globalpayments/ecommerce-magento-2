@@ -58,15 +58,15 @@ class RealexPaymentManagement implements \RealexPayments\HPP\API\RealexPaymentMa
     /**
      * RealexPaymentManagement constructor.
      *
-     * @param \RealexPayments\HPP\Helper\Data                                 $helper
-     * @param \RealexPayments\HPP\API\RemoteXMLInterface                      $remoteXml
-     * @param \Magento\Checkout\Model\Session                                 $session
-     * @param \Magento\Sales\Model\Order\Payment\Transaction\BuilderInterface $transactionBuilder
-     * @param \RealexPayments\HPP\Logger\Logger                               $logger
-     * @param \Magento\Sales\Model\Order\Email\Sender\OrderSender             $orderSender
-     * @param \Magento\Sales\Model\Order\Status\HistoryFactory                $orderHistoryFactory
-     * @param \Magento\Customer\Api\CustomerRepositoryInterface               $customerRepository
-     * @param \Magento\Sales\Model\OrderRepository                            $orderRepository
+     * @param  \RealexPayments\HPP\Helper\Data  $helper
+     * @param  \RealexPayments\HPP\API\RemoteXMLInterface  $remoteXml
+     * @param  \Magento\Checkout\Model\Session  $session
+     * @param  \Magento\Sales\Model\Order\Payment\Transaction\BuilderInterface  $transactionBuilder
+     * @param  \RealexPayments\HPP\Logger\Logger  $logger
+     * @param  \Magento\Sales\Model\Order\Email\Sender\OrderSender  $orderSender
+     * @param  \Magento\Sales\Model\Order\Status\HistoryFactory  $orderHistoryFactory
+     * @param  \Magento\Customer\Api\CustomerRepositoryInterface  $customerRepository
+     * @param  \Magento\Sales\Model\OrderRepository  $orderRepository
      */
     public function __construct(
         \RealexPayments\HPP\Helper\Data $helper,
@@ -127,9 +127,9 @@ class RealexPaymentManagement implements \RealexPayments\HPP\API\RealexPaymentMa
         $this->_addTransaction($payment, $order, $pasref, $response, $isAutoSettle);
         //place payment
         $payment->getMethodInstance()
-                ->setIsInitializeNeeded(false);
+            ->setIsInitializeNeeded(false);
 
-        $fraud = $this->checkFraud($response, $payment, $isAutoSettle, $pasref, $amount);
+        $fraud = $this->checkFraud($response, $order, $payment, $isAutoSettle, $pasref, $amount);
         $payment->place();
         if ($fraud) {
             $order->setState(\Magento\Sales\Model\Order::STATE_PAYMENT_REVIEW)
@@ -145,7 +145,6 @@ class RealexPaymentManagement implements \RealexPayments\HPP\API\RealexPaymentMa
 
             $order->setState(\Magento\Sales\Model\Order::STATE_PROCESSING)
                 ->setStatus($confirmedPaymentStatus);
-
         }
 
         $order->save();
@@ -164,15 +163,20 @@ class RealexPaymentManagement implements \RealexPayments\HPP\API\RealexPaymentMa
     }
 
     /**
-     * @param OrderInterface|Order $order
-     * @param array                $response
+     * @param  OrderInterface|Order  $order
+     * @param  array  $response
      *
      * @return bool
      * @throws \Exception
      */
-    public function processResponseApm($order, $response) {
-        if (!$this->_helper->isApmEnabled()) return false;
-        if (!$this->_helper->isOrderPendingPayment($order)) return false;
+    public function processResponseApm($order, $response)
+    {
+        if (!$this->_helper->isApmEnabled()) {
+            return false;
+        }
+        if (!$this->_helper->isOrderPendingPayment($order)) {
+            return false;
+        }
 
         $payment = $order->getPayment();
 
@@ -241,17 +245,22 @@ class RealexPaymentManagement implements \RealexPayments\HPP\API\RealexPaymentMa
         return true;
     }
 
-    private function checkFraud($response, $payment, $isAutoSettle, $pasref, $amount)
+    private function checkFraud($response, $order, $payment, $isAutoSettle, $pasref, $amount)
     {
         $fraud = false;
         if (isset($response['HPP_FRAUDFILTER_RESULT'])) {
             $fraudAction = $response['HPP_FRAUDFILTER_RESULT'];
-            if (!isset($response['HPP_FRAUDFILTER_MODE'])
-              || (isset($response['HPP_FRAUDFILTER_MODE']) && $response['HPP_FRAUDFILTER_MODE'] == 'ACTIVE')) {
+            if (
+                !isset($response['HPP_FRAUDFILTER_MODE'])
+                || (
+                    isset($response['HPP_FRAUDFILTER_MODE'])
+                    && $response['HPP_FRAUDFILTER_MODE'] == 'ACTIVE'
+                )
+            ) {
                 if ($fraudAction == self::FRAUD_HOLD) {
                     //send order for review
                     $payment->setIsFraudDetected(true)
-                          ->setIsTransactionPending(true);
+                        ->setIsTransactionPending(true);
                     $fraud = true;
                     //Should we invoice
                     if ($isAutoSettle) {
@@ -261,7 +270,7 @@ class RealexPaymentManagement implements \RealexPayments\HPP\API\RealexPaymentMa
                 if ($fraudAction == self::FRAUD_BLOCK) {
                     //send order for decline
                     $payment->setIsFraudDetected(true)
-                      ->setIsTransactionPending(true);
+                        ->setIsTransactionPending(true);
                     $fraud = true;
                 }
             }
@@ -271,11 +280,12 @@ class RealexPaymentManagement implements \RealexPayments\HPP\API\RealexPaymentMa
     }
 
     /**
-     * @param Order $order
+     * @param  Order  $order
      *
      * @return bool|mixed
      */
-    public function getDefaultPaymentSuccessfulStatus($order) {
+    public function getDefaultPaymentSuccessfulStatus($order)
+    {
         $confirmedPaymentStatus = $this->_helper->getConfigData('payment_successful', $order->getStoreId());
         if (empty($confirmedPaymentStatus)) {
             $confirmedPaymentStatus = $order->getConfig()->getStateDefaultStatus(\Magento\Sales\Model\Order::STATE_PROCESSING);
@@ -302,9 +312,9 @@ class RealexPaymentManagement implements \RealexPayments\HPP\API\RealexPaymentMa
     /**
      * @desc Create an invoice
      *
-     * @param \Magento\Sales\Model\Order $order
-     * @param string                    $pasref
-     * @param string                    $amount
+     * @param  \Magento\Sales\Model\Order  $order
+     * @param  string  $pasref
+     * @param  string  $amount
      */
     private function _invoice($order, $pasref, $amount)
     {
@@ -314,8 +324,8 @@ class RealexPaymentManagement implements \RealexPayments\HPP\API\RealexPaymentMa
         // set transaction id so you can do a online refund from credit memo
         $invoice->setTransactionId($pasref);
         $invoice->register()
-                ->pay()
-                ->save();
+            ->pay()
+            ->save();
 
         $message = __(
             'Invoiced amount of %1 Transaction ID: %2',
@@ -328,8 +338,8 @@ class RealexPaymentManagement implements \RealexPayments\HPP\API\RealexPaymentMa
     /**
      * @desc Handles the card storage fields
      *
-     * @param array  $response
-     * @param string $customerId
+     * @param  array  $response
+     * @param  string  $customerId
      */
     private function _handleCardStorage($response, $customerId)
     {
@@ -374,10 +384,10 @@ class RealexPaymentManagement implements \RealexPayments\HPP\API\RealexPaymentMa
     /**
      * @desc Store the payer ref against the customer
      *
-     * @param string $merchantId
-     * @param string $account
-     * @param string $payerRef
-     * @param string $customerId
+     * @param  string  $merchantId
+     * @param  string  $account
+     * @param  string  $payerRef
+     * @param  string  $customerId
      */
     private function _storeCustomerPayerRef($merchantId, $account, $payerRef, $customerId)
     {
@@ -398,7 +408,7 @@ class RealexPaymentManagement implements \RealexPayments\HPP\API\RealexPaymentMa
     /**
      * @desc Manage cards that were edited while the user was on hpp
      *
-     * @param string $cards
+     * @param  string  $cards
      */
     private function _manageEditedCards($cards)
     {
@@ -408,7 +418,7 @@ class RealexPaymentManagement implements \RealexPayments\HPP\API\RealexPaymentMa
     /**
      * @desc Manage cards that were deleted while the user was on hpp
      *
-     * @param string $cards
+     * @param  string  $cards
      */
     private function _manageDeletedCards($cards)
     {
@@ -418,9 +428,9 @@ class RealexPaymentManagement implements \RealexPayments\HPP\API\RealexPaymentMa
     /**
      * @desc Called after payment is authorised
      *
-     * @param \Magento\Sales\Model\Order $order
-     * @param string                    $pasref
-     * @param string                    $amount
+     * @param  \Magento\Sales\Model\Order  $order
+     * @param  string  $pasref
+     * @param  string  $amount
      */
     private function _paymentIsAuthorised($order, $pasref, $amount)
     {
@@ -433,8 +443,8 @@ class RealexPaymentManagement implements \RealexPayments\HPP\API\RealexPaymentMa
     }
 
     /**
-     * @param OrderInterface|Order $order
-     * @param string         $message
+     * @param  OrderInterface|Order  $order
+     * @param  string  $message
      */
     public function addHistoryComment($order, $message)
     {
@@ -444,15 +454,15 @@ class RealexPaymentManagement implements \RealexPayments\HPP\API\RealexPaymentMa
     /**
      * @desc Add a comment to order history
      *
-     * @param \Magento\Sales\Model\Order $order
-     * @param string                    $message
+     * @param  \Magento\Sales\Model\Order  $order
+     * @param  string  $message
      */
     private function _addHistoryComment($order, $message)
     {
         $history = $this->_orderHistoryFactory->create()
-          ->setComment($message)
-          ->setEntityName('order')
-          ->setOrder($order);
+            ->setComment($message)
+            ->setEntityName('order')
+            ->setOrder($order);
 
         $history->save();
     }
@@ -460,7 +470,7 @@ class RealexPaymentManagement implements \RealexPayments\HPP\API\RealexPaymentMa
     /**
      * @desc Validates the response fields
      *
-     * @param array $response
+     * @param  array  $response
      *
      * @return bool
      */
@@ -469,11 +479,11 @@ class RealexPaymentManagement implements \RealexPayments\HPP\API\RealexPaymentMa
         // 01 means pending in terms of APM and is a valid result code
         $successfulResultCodes = $this->isTransactionApm($response) ? ['00', '01'] : ['00'];
         if ($response == null ||
-           !isset($response['RESULT']) ||
-           !isset($response['PASREF']) ||
-           !isset($response['AMOUNT']) ||
-           !in_array($response['RESULT'], $successfulResultCodes) ||
-           !ctype_digit($response['AMOUNT'])) {
+            !isset($response['RESULT']) ||
+            !isset($response['PASREF']) ||
+            !isset($response['AMOUNT']) ||
+            !in_array($response['RESULT'], $successfulResultCodes) ||
+            !ctype_digit($response['AMOUNT'])) {
             return false;
         }
 
@@ -485,29 +495,30 @@ class RealexPaymentManagement implements \RealexPayments\HPP\API\RealexPaymentMa
      *
      * @return bool
      */
-    public function isTransactionApm($response) {
+    public function isTransactionApm($response)
+    {
         return $this->_helper->isApmEnabled() && !isset($response['AUTHCODE']);
     }
 
     /**
      * @desc Add order transaction
      *
-     * @param \Magento\Sales\Model\Order\Payment $payment
-     * @param \Magento\Sales\Model\Order         $order
-     * @param string                            $pasref
-     * @param array                             $response
+     * @param  \Magento\Sales\Model\Order\Payment  $payment
+     * @param  \Magento\Sales\Model\Order  $order
+     * @param  string  $pasref
+     * @param  array  $response
      */
     private function _addTransaction($payment, $order, $pasref, $response, $isAutoSettle)
     {
         $type = $isAutoSettle
-              ? \Magento\Sales\Model\Order\Payment\Transaction::TYPE_CAPTURE
-              : \Magento\Sales\Model\Order\Payment\Transaction::TYPE_AUTH;
+            ? \Magento\Sales\Model\Order\Payment\Transaction::TYPE_CAPTURE
+            : \Magento\Sales\Model\Order\Payment\Transaction::TYPE_AUTH;
         $transaction = $this->_transactionBuilder
-          ->setPayment($payment)
-          ->setOrder($order)
-          ->setTransactionId($pasref)
-          ->setFailSafe(true)
-          ->build($type);
+            ->setPayment($payment)
+            ->setOrder($order)
+            ->setTransactionId($pasref)
+            ->setFailSafe(true)
+            ->build($type);
         $transaction->setAdditionalInformation(
             \Magento\Sales\Model\Order\Payment\Transaction::RAW_DETAILS,
             $this->_helper->stripFields($response)

@@ -149,24 +149,29 @@ class SessionResult extends \Magento\Framework\App\Action\Action
     }
 
     /**
-     * @param  array  $response
+     * @param array $response
      *
      * @return \Magento\Framework\Controller\ResultInterface|\Magento\Framework\View\Result\Layout
      */
     private function _handlePendingApmConfirmation($response)
     {
-        $params = [];
-
         if (isset($response['final']) && $response['final'] === '1') {
             $this->_redirect('checkout/onepage/success');
         }
 
-        $params['statusFetchUrl'] = $this->_url->getUrl('realexpayments_hpp/apm/statusfetcher',
-            ['order_id' => $response['order_id']]);
-        $params['finalRedirectUrl'] = $this->_url->getUrl('realexpayments_hpp/process/sessionresult', $response);
-        $params['finalRedirectUrlStillPending'] = $this->_url->getUrl('realexpayments_hpp/process/sessionresult',
-            array_merge($response, ['final' => '1']));
-        $params['interval'] = 2000;
+        $params = [
+            'statusFetchUrl' =>
+                $this->_url->getUrl(
+                    'realexpayments_hpp/apm/statusfetcher',
+                    ['order_id' => $response['order_id']]
+                ),
+            'finalRedirectUrl' =>
+                $this->_url->getUrl(
+                    'realexpayments_hpp/process/sessionresult',
+                    array_merge($response, ['final' => '1'])
+                ),
+            'interval' => 2000,
+        ];
 
         $page = $this->_resultFactory->create(ResultFactory::TYPE_PAGE);
 
@@ -180,8 +185,12 @@ class SessionResult extends \Magento\Framework\App\Action\Action
 
     private function _validateResponse($response)
     {
-        if (!isset($response) || !isset($response['timestamp']) || !isset($response['order_id']) ||
-            !isset($response['result']) || !isset($response['hash'])) {
+        if (
+            !isset($response)
+            || !isset($response['timestamp'])
+            || !isset($response['order_id'])
+            || !isset($response['result']) || !isset($response['hash'])
+        ) {
             return false;
         }
 
@@ -193,7 +202,7 @@ class SessionResult extends \Magento\Framework\App\Action\Action
         $sha1hash = $this->_helper->signFields("$timestamp.$merchantid.$orderid.$result");
 
         //Check to see if hashes match or not
-        if ($sha1hash !== $hash) {
+        if ($sha1hash !== $hash){
             return false;
         }
 

@@ -17,16 +17,18 @@ define(["jquery"], function ($) {
                         if (res.hasOwnProperty('isPending') && res.isPending === false) {
                             window.top.location = config.finalRedirectUrl;
                         }
-
-                        if (cycles >= 3) {
-                            window.top.location = config.finalRedirectUrlStillPending;
-                        }
                     }).always(function () {
                         cycles++;
+                        if (cycles >= 3) {
+                            window.top.location = config.finalRedirectUrl;
+                        }
+                        else {
+                            setTimeout(fetchStatus, interval);
+                        }
                     });
                 }
 
-                var intervalFunction = setInterval(fetchStatus, interval);
+                setTimeout(fetchStatus, interval);
             } else {
                 console.error(config.statusFetchUrl, config.finalRedirectUrl);
                 panic();

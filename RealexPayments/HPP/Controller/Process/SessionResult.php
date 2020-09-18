@@ -4,7 +4,6 @@ namespace RealexPayments\HPP\Controller\Process;
 
 use Magento\Framework\Controller\ResultFactory;
 use Magento\Sales\Api\Data\OrderInterface;
-use Magento\Sales\Model\Order;
 use RealexPayments\HPP\API\RealexPaymentManagementInterface;
 use RealexPayments\HPP\Model\API\RealexPaymentManagement;
 
@@ -14,11 +13,6 @@ class SessionResult extends \Magento\Framework\App\Action\Action
      * @var \RealexPayments\HPP\Helper\Data
      */
     private $_helper;
-
-    /**
-     * @var \Magento\Sales\Model\OrderFactory
-     */
-    private $_orderFactory;
 
     /**
      * @var \Magento\Sales\Model\Order
@@ -49,25 +43,22 @@ class SessionResult extends \Magento\Framework\App\Action\Action
     /**
      * Result constructor.
      *
-     * @param \Magento\Framework\App\Action\Context                    $context
-     * @param \RealexPayments\HPP\Helper\Data                          $helper
-     * @param \Magento\Sales\Model\OrderFactory                        $orderFactory
-     * @param \RealexPayments\HPP\Logger\Logger                        $logger
-     * @param \Magento\Checkout\Model\Session                          $session
-     * @param ResultFactory                                            $resultFactory
-     * @param RealexPaymentManagementInterface|RealexPaymentManagement $paymentManagement
+     * @param  \Magento\Framework\App\Action\Context  $context
+     * @param  \RealexPayments\HPP\Helper\Data  $helper
+     * @param  \RealexPayments\HPP\Logger\Logger  $logger
+     * @param  \Magento\Checkout\Model\Session  $session
+     * @param  ResultFactory  $resultFactory
+     * @param  RealexPaymentManagementInterface|RealexPaymentManagement  $paymentManagement
      */
     public function __construct(
         \Magento\Framework\App\Action\Context $context,
         \RealexPayments\HPP\Helper\Data $helper,
-        \Magento\Sales\Model\OrderFactory $orderFactory,
         \RealexPayments\HPP\Logger\Logger $logger,
         \Magento\Checkout\Model\Session $session,
         ResultFactory $resultFactory,
         RealexPaymentManagementInterface $paymentManagement
     ) {
         $this->_helper = $helper;
-        $this->_orderFactory = $orderFactory;
         $this->_url = $context->getUrl();
         $this->_logger = $logger;
         $this->_session = $session;
@@ -103,8 +94,8 @@ class SessionResult extends \Magento\Framework\App\Action\Action
 
         if ($result) {
             $this->_session->getQuote()
-                  ->setIsActive(false)
-                  ->save();
+                ->setIsActive(false)
+                ->save();
             $this->_redirect('checkout/onepage/success');
         } else {
             $this->_cancel();
@@ -118,15 +109,18 @@ class SessionResult extends \Magento\Framework\App\Action\Action
     }
 
     /**
-     * @param OrderInterface $order
-     * @param array          $response
+     * @param  OrderInterface  $order
+     * @param  array  $response
      *
      * @return bool|\Magento\Framework\Controller\ResultInterface|\Magento\Framework\View\Result\Layout|void
      * @throws \Magento\Framework\Exception\LocalizedException
      * @throws \Magento\Framework\Exception\NoSuchEntityException
      */
-    private function _handleApm($order, $response) {
-        if (!$this->_paymentManagement->isTransactionApm($response)) return false;
+    private function _handleApm($order, $response)
+    {
+        if (!$this->_paymentManagement->isTransactionApm($response)) {
+            return false;
+        }
 
         if ($this->_helper->isOrderPendingPayment($order)) {
             return $this->_handlePendingApmConfirmation($response);
@@ -155,21 +149,24 @@ class SessionResult extends \Magento\Framework\App\Action\Action
     }
 
     /**
-     * @param array $response
+     * @param  array  $response
      *
      * @return \Magento\Framework\Controller\ResultInterface|\Magento\Framework\View\Result\Layout
      */
-    private function _handlePendingApmConfirmation($response) {
+    private function _handlePendingApmConfirmation($response)
+    {
         $params = [];
 
         if (isset($response['final']) && $response['final'] === '1') {
             $this->_redirect('checkout/onepage/success');
         }
 
-        $params['statusFetchUrl']               = $this->_url->getUrl('realexpayments_hpp/apm/statusfetcher', ['order_id' => $response['order_id']]);
-        $params['finalRedirectUrl']             = $this->_url->getUrl('realexpayments_hpp/process/sessionresult', $response);
-        $params['finalRedirectUrlStillPending'] = $this->_url->getUrl('realexpayments_hpp/process/sessionresult', array_merge($response, ['final' => '1']));
-        $params['interval']                     = 2000;
+        $params['statusFetchUrl'] = $this->_url->getUrl('realexpayments_hpp/apm/statusfetcher',
+            ['order_id' => $response['order_id']]);
+        $params['finalRedirectUrl'] = $this->_url->getUrl('realexpayments_hpp/process/sessionresult', $response);
+        $params['finalRedirectUrlStillPending'] = $this->_url->getUrl('realexpayments_hpp/process/sessionresult',
+            array_merge($response, ['final' => '1']));
+        $params['interval'] = 2000;
 
         $page = $this->_resultFactory->create(ResultFactory::TYPE_PAGE);
 
@@ -196,7 +193,7 @@ class SessionResult extends \Magento\Framework\App\Action\Action
         $sha1hash = $this->_helper->signFields("$timestamp.$merchantid.$orderid.$result");
 
         //Check to see if hashes match or not
-        if ($sha1hash !== $hash){
+        if ($sha1hash !== $hash) {
             return false;
         }
 
@@ -226,7 +223,7 @@ class SessionResult extends \Magento\Framework\App\Action\Action
     private function _getOrder($incrementId)
     {
         if (!$this->_order) {
-            $this->_order = $this->_orderFactory->create()->loadByIncrementId($incrementId);
+            $this->_order = $this->_helper->getOrderByIncrement($incrementId);
         }
 
         return $this->_order;

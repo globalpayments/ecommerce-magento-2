@@ -13,11 +13,6 @@ class Base extends \Magento\Framework\App\Action\Action
     private $_helper;
 
     /**
-     * @var \Magento\Sales\Model\OrderFactory
-     */
-    private $_orderFactory;
-
-    /**
      * @var \Magento\Sales\Model\Order
      */
     private $_order;
@@ -54,7 +49,6 @@ class Base extends \Magento\Framework\App\Action\Action
      *
      * @param \Magento\Framework\App\Action\Context                    $context
      * @param \RealexPayments\HPP\Helper\Data                          $helper
-     * @param \Magento\Sales\Model\OrderFactory                        $orderFactory
      * @param \Magento\Framework\Registry                              $coreRegistry
      * @param \RealexPayments\HPP\Logger\Logger                        $logger
      * @param \RealexPayments\HPP\API\RealexPaymentManagementInterface $paymentManagement
@@ -63,14 +57,12 @@ class Base extends \Magento\Framework\App\Action\Action
     public function __construct(
         \Magento\Framework\App\Action\Context $context,
         \RealexPayments\HPP\Helper\Data $helper,
-        \Magento\Sales\Model\OrderFactory $orderFactory,
         \Magento\Framework\Registry $coreRegistry,
         \RealexPayments\HPP\Logger\Logger $logger,
         \RealexPayments\HPP\API\RealexPaymentManagementInterface $paymentManagement,
         OrderSender $orderSender
     ) {
         $this->_helper = $helper;
-        $this->_orderFactory = $orderFactory;
         $this->_url = $context->getUrl();
         $this->coreRegistry = $coreRegistry;
         $this->_logger = $logger;
@@ -218,12 +210,15 @@ class Base extends \Magento\Framework\App\Action\Action
         $timestamp = strftime('%Y%m%d%H%M%S');
         $merchantid = $this->_helper->getConfigData('merchant_id');
         $isApmPending = $this->_paymentManagement->isTransactionApm($response) ? '1' : '0';
+
         // if no order id exists
-        if(!$this->_order) {
+        if (!$this->_order) {
           return false;
         }
-        else { $orderid = $this->_order->getIncrementId();
+        else {
+            $orderid = $this->_order->getIncrementId();
         }
+
         $sha1hash = $this->_helper->signFields("$timestamp.$merchantid.$orderid.$result");
 
         return ['timestamp' => $timestamp, 'order_id' => $orderid, 'result' => $result, 'hash' => $sha1hash, 'apm_pending' => $isApmPending];
@@ -239,7 +234,7 @@ class Base extends \Magento\Framework\App\Action\Action
     private function _getOrder($incrementId)
     {
         if (!$this->_order) {
-            $this->_order = $this->_orderFactory->create()->loadByIncrementId($incrementId);
+            $this->_order = $this->_helper->getOrderByIncrement($incrementId);
         }
 
         return $this->_order;

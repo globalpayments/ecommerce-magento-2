@@ -59,7 +59,7 @@ class StatusFetcher extends Action
             throw new NotFoundException(new Phrase("Trying to access URL in non-AJAX context"));
         }
 
-        $order = $this->_orderRepository->get($orderId);
+        $order = $this->_helper->getOrderByIncrement($orderId);
 
         if (!$order) {
             throw new NotFoundException(new Phrase("Order couldn't be found"));

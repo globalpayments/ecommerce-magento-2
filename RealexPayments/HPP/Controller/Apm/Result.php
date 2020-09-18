@@ -143,8 +143,9 @@ class Result extends Action implements CsrfAwareActionInterface
 
             return false;
         }
+
         //get the actual order id
-        [$incrementId, $orderTimestamp] = explode('_', $response['orderid']);
+        $incrementId = implode('_', explode('_', $response['orderid'], -1));
 
         if (!$incrementId) {
             $this->_logger->critical(__('Async - Gateway response does not have an order id.'));
@@ -205,7 +206,7 @@ class Result extends Action implements CsrfAwareActionInterface
     private function _getOrder($incrementId)
     {
         if (!$this->_order) {
-            $this->_order = $this->_orderRepository->get($incrementId);
+            $this->_order = $this->_helper->getOrderByIncrement($incrementId);
         }
 
         return $this->_order;

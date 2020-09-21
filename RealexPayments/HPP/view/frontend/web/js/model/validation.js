@@ -1,37 +1,54 @@
 define(
     [
+        'jquery',
         'mage/translate',
         'Magento_Ui/js/model/messageList',
         'Magento_Checkout/js/model/quote'
     ],
-    function ($t, messageList, quote) {
+    function ($, $t, messageList, quote) {
         'use strict';
         return {
             validate: function () {
                 var shippingAddress = quote.shippingAddress(),
                     billingAddress = quote.billingAddress();
 
-                var isValid = true;
-
-                if (!this.isValidName(shippingAddress.firstname ||
-                    !this.isValidName(shippingAddress.lastname)) ||
-                    !this.isValidAddress(shippingAddress.street)) {
-                    isValid = false;
+                if (!this.isValidName(shippingAddress.firstname)) {
                     messageList.addErrorMessage({
-                        message: $t('Please check the following fields: First name, Last name and Shipping address. ' +
+                        message: $t('Please check the First name. ' +
+                            'The selected payment method only allows letters, numbers, spaces or punctuation only, and no more than 60 characters.')
+                    });
+
+                    return false;
+                }
+
+                if (!this.isValidName(shippingAddress.lastname)) {
+                    messageList.addErrorMessage({
+                        message: $t('Please check the Last name. ' +
+                            'The selected payment method only allows letters, numbers, spaces or punctuation only, and no more than 60 characters.')
+                    });
+
+                    return false;
+                }
+
+                if (!this.isValidAddress(shippingAddress.street)) {
+                    messageList.addErrorMessage({
+                        message: $t('Please check the Shipping address. ' +
                             'The selected payment method only allows letters, numbers, spaces or punctuation only, and no more than 50 characters.')
                     });
+
+                    return false;
                 }
 
                 if (!this.isValidAddress(billingAddress.street)) {
-                    isValid = false;
                     messageList.addErrorMessage({
                         message: $t('Please check the Billing address. ' +
                             'The selected payment method only allows letters, numbers, spaces or punctuation only, and no more than 50 characters.')
                     });
+
+                    return false;
                 }
 
-                return isValid;
+                return true;
             },
 
             /**

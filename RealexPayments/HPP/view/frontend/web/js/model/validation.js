@@ -1,11 +1,10 @@
 define(
     [
-        'jquery',
         'mage/translate',
         'Magento_Ui/js/model/messageList',
         'Magento_Checkout/js/model/quote'
     ],
-    function ($, $t, messageList, quote) {
+    function ($t, messageList, quote) {
         'use strict';
         return {
             validate: function () {

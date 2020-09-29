@@ -30,6 +30,16 @@
                                                                 </item>
                                                             </item>
                                                         </item>
+
+                                                        <item name="additional-payment-validators" xsi:type="array">
+                                                            <item name="children" xsi:type="array">
+                                                                <!-- Declare your validation. START -->
+                                                                <item name="realexpayments_hpp_validation" xsi:type="array">
+                                                                    <item name="component" xsi:type="string">RealexPayments_HPP/js/view/validation</item>
+                                                                </item>
+                                                                <!-- Declare your validation. END -->
+                                                            </item>
+                                                        </item>
                                                     </item>
                                                 </item>
                                             </item>

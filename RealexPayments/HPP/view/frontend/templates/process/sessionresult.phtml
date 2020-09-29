@@ -1,0 +1,66 @@
+<?php
+/** @var \Magento\Framework\View\Element\Template $block */
+
+$params = $block->getData('params'); ?>
+
+<style>
+    @keyframes global-payments-order-status-check {
+        0% {
+            transform: scale(0.9);
+            -webkit-transform: scale(0.9);
+        }
+        70% {
+            transform: scale(1.3);
+            -webkit-transform: scale(1.3);
+        }
+        100% {
+            transform: scale(0.9);
+            -webkit-transform: scale(0.9);
+        }
+    }
+
+    body {
+        overflow: hidden;
+        max-width: 100vw;
+        max-height: 100vh;
+    }
+
+    #gp-apm-result {
+        position: absolute;
+        left: 50%;
+        top: 50%;
+        transform: translate(-50%, -50%);
+        width: 100%;
+        text-align: center;
+    }
+
+    #gp-apm-result .gp-apm-animated {
+        -webkit-animation: global-payments-order-status-check 2s infinite;
+        animation: global-payments-order-status-check 2s infinite;
+        margin: 0;
+        text-align: center;
+    }
+</style>
+<script>
+    requirejs(["RealexPayments_HPP/js/model/apm-fetch-status"], function (action) {
+        action({
+            statusFetchUrl: '<?php echo $params['statusFetchUrl']; ?>',
+            finalRedirectUrl: '<?php echo $params['finalRedirectUrl']; ?>',
+            interval: '<?php echo $params['interval']; ?>'
+        });
+    })
+</script>
+<div id="gp-apm-result-ctn">
+    <div id="gp-apm-result">
+        <div class="gp-apm-loader">
+            <h3><?php echo __('Checking your order status'); ?></h3>
+            <h3 class="gp-apm-animated">...</h3>
+        </div>
+        <div style="display: none;" class="gp-apm-result">
+            <h3><?php echo __('Your order is <b>pending payment<b/>'); ?></h3>
+            <p><?php echo __('Click here to return to the homepage') ?> - <a href="<?php echo $this->getBaseUrl(); ?>"><?php echo $this->getBaseUrl(); ?></a></p>
+        </div>
+    </div>
+</div>
+
+

@@ -18,6 +18,12 @@ define(
 
         return {
             validate: function () {
+                var paymentMethod = quote.paymentMethod().method;
+
+                if (paymentMethod != 'realexpayments_hpp') {
+                    return true;
+                }
+
                 var shippingAddress = quote.shippingAddress(),
                     billingAddress = quote.billingAddress();
 

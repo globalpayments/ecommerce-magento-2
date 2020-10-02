@@ -2,6 +2,10 @@
 
 namespace RealexPayments\HPP\Block\Checkout\Onepage;
 
+use RealexPayments\HPP\API\RealexPaymentManagementInterface;
+use RealexPayments\HPP\Helper\Data;
+use RealexPayments\HPP\Model\API\RealexPaymentManagement;
+
 class Success extends \Magento\Framework\View\Element\Template
 {
     /**
@@ -14,20 +18,32 @@ class Success extends \Magento\Framework\View\Element\Template
      */
     private $_customerSession;
 
+    /** @var RealexPaymentManagementInterface|RealexPaymentManagement */
+    private $_paymentManagement;
+
+    /** @var Data */
+    private $_dataHelper;
+
     /**
      * @param \Magento\Framework\View\Element\Template\Context $context
      * @param \Magento\Checkout\Model\Session                  $checkoutSession
      * @param \Magento\Customer\Model\Session                  $customerSession
+     * @param RealexPaymentManagementInterface                 $paymentManagement
+     * @param Data                                             $dataHelper
      * @param array                                            $data
      */
     public function __construct(
         \Magento\Framework\View\Element\Template\Context $context,
         \Magento\Checkout\Model\Session $checkoutSession,
         \Magento\Customer\Model\Session $customerSession,
+        RealexPaymentManagementInterface $paymentManagement,
+        Data $dataHelper,
         array $data = []
     ) {
         $this->_checkoutSession = $checkoutSession;
         $this->_customerSession = $customerSession;
+        $this->_paymentManagement = $paymentManagement;
+        $this->_dataHelper = $dataHelper;
         parent::__construct($context, $data);
     }
 
@@ -48,10 +64,12 @@ class Success extends \Magento\Framework\View\Element\Template
                 $fields = $order->getPayment()->getAdditionalInformation();
                 $newPayer = ($customerId && ((isset($fields['PAYER_SETUP']) && $fields['PAYER_SETUP'] == '00')
                             || (isset($fields['PMT_SETUP']) && $fields['PMT_SETUP'] == '00')));
+                $isApmPending = $this->_dataHelper->isOrderPendingPayment($order) && $this->_paymentManagement->isTransactionApm($fields);
                 $this->addData(
                     [
-                    'is_realex' => true,
-                    'new_payer' => $newPayer,
+                        'is_realex'      => true,
+                        'new_payer'      => $newPayer,
+                        'is_apm_pending' => $isApmPending
                     ]
                 );
 

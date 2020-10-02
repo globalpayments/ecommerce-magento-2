@@ -15,6 +15,7 @@ define(
                 type: 'popup',
                 responsive: true,
                 innerScroll: false,
+                clickableOverlay: false,
                 buttons: [{
                     class: '',
                     text: $t('Cancel'),

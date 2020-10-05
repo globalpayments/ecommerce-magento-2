@@ -3,6 +3,7 @@
 namespace RealexPayments\HPP\Helper;
 
 use Magento\Framework\App\Helper\AbstractHelper;
+use Magento\Sales\Api\Data\OrderInterface;
 use RealexPayments\HPP\Model\Config\Source\Environment;
 
 /**
@@ -69,6 +70,11 @@ class Data extends AbstractHelper
     private $_session;
 
     /**
+     * @var \Magento\Sales\Model\OrderFactory
+     */
+    private $_orderFactory;
+
+    /**
      * @var \Magento\Framework\App\DeploymentConfig
      */
     protected $_deploymentConfig;
@@ -78,17 +84,20 @@ class Data extends AbstractHelper
     /**
      * Data constructor.
      *
-     * @param \Magento\Framework\App\Helper\Context $context
-     * @param \Magento\Framework\Encryption\EncryptorInterface $encryptor
-     * @param \Magento\Directory\Model\Config\Source\Country $country
-     * @param \Magento\Quote\Api\CartRepositoryInterface $quoteRepository
-     * @param \Magento\Framework\Module\ModuleListInterface $moduleList
-     * @param \Magento\Store\Model\StoreManagerInterface $storeManager
-     * @param \Magento\Framework\App\ProductMetadataInterface $productMetadata
-     * @param \Magento\Framework\Module\ResourceInterface $resourceInterface
-     * @param \Magento\Framework\Locale\ResolverInterface $resolver
-     * @param \Magento\Customer\Api\CustomerRepositoryInterface $customerRepository
-     * @param \Magento\Customer\Model\Session $session
+     * @param  \Magento\Framework\App\Helper\Context  $context
+     * @param  \Magento\Framework\Encryption\EncryptorInterface  $encryptor
+     * @param  \Magento\Directory\Model\Config\Source\Country  $country
+     * @param  \Magento\Quote\Api\CartRepositoryInterface  $quoteRepository
+     * @param  \Magento\Framework\Module\ModuleListInterface  $moduleList
+     * @param  \Magento\Store\Model\StoreManagerInterface  $storeManager
+     * @param  \RealexPayments\HPP\Logger\Logger  $realexLogger
+     * @param  \Magento\Framework\App\ProductMetadataInterface  $productMetadata
+     * @param  \Magento\Framework\Module\ResourceInterface  $resourceInterface
+     * @param  \Magento\Framework\Locale\ResolverInterface  $resolver
+     * @param  \Magento\Customer\Api\CustomerRepositoryInterface  $customerRepository
+     * @param  \Magento\Customer\Model\Session  $session
+     * @param  \Magento\Framework\App\DeploymentConfig  $deploymentConfig
+     * @param  \Magento\Sales\Model\OrderFactory  $orderFactory
      */
     public function __construct(
         \Magento\Framework\App\Helper\Context $context,
@@ -103,7 +112,8 @@ class Data extends AbstractHelper
         \Magento\Framework\Locale\ResolverInterface $resolver,
         \Magento\Customer\Api\CustomerRepositoryInterface $customerRepository,
         \Magento\Customer\Model\Session $session,
-        \Magento\Framework\App\DeploymentConfig $deploymentConfig
+        \Magento\Framework\App\DeploymentConfig $deploymentConfig,
+        \Magento\Sales\Model\OrderFactory $orderFactory
     ) {
         parent::__construct($context);
         $this->_encryptor = $encryptor;
@@ -118,6 +128,7 @@ class Data extends AbstractHelper
         $this->_customerRepository = $customerRepository;
         $this->_session = $session;
         $this->_deploymentConfig = $deploymentConfig;
+        $this->_orderFactory = $orderFactory;
     }
 
     public function setStoreId($storeId) {
@@ -328,7 +339,7 @@ class Data extends AbstractHelper
     /**
      * @desc Cancels the order
      *
-     * @param \Magento\Sales\Mode\Order $order
+     * @param \Magento\Sales\Model\Order $order
      */
     public function cancelOrder($order)
     {
@@ -547,6 +558,16 @@ class Data extends AbstractHelper
     }
 
     /**
+     * @return bool
+     */
+    public function isApmEnabled() {
+        // if apm is gonna be controlled via a shop setting at some point
+        // pending transactions that did not receive a final status by the time the setting was turned off won't be processed
+
+        return true;
+    }
+
+    /**
      * @desc Gives back configuration values as flag
      *
      * @param $field
@@ -613,5 +634,30 @@ class Data extends AbstractHelper
         }
 
         return trim($responseUrl, '/');
+    }
+
+    /**
+     * @param OrderInterface $order
+     *
+     * @return bool
+     */
+    public function isOrderPendingPayment($order)
+    {
+        return array_key_exists(
+                $order->getStatus(),
+                $order->getConfig()->getStateStatuses(\Magento\Sales\Model\Order::STATE_PENDING_PAYMENT)
+            );
+    }
+
+    /**
+     * Get order based on increment id.
+     *
+     * @param $incrementId
+     *
+     * @return \Magento\Sales\Model\Order
+     */
+    public function getOrderByIncrement($incrementId)
+    {
+        return $this->_orderFactory->create()->loadByIncrementId($incrementId);
     }
 }

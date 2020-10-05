@@ -2,17 +2,14 @@
 
 namespace RealexPayments\HPP\Controller\Process\Result;
 
+use Amazon\Payment\Model\PaymentManagement;
+
 class Base extends \Magento\Framework\App\Action\Action
 {
     /**
      * @var \RealexPayments\HPP\Helper\Data
      */
     private $_helper;
-
-    /**
-     * @var \Magento\Sales\Model\OrderFactory
-     */
-    private $_orderFactory;
 
     /**
      * @var \Magento\Sales\Model\Order
@@ -27,7 +24,7 @@ class Base extends \Magento\Framework\App\Action\Action
     /**
      * Core registry.
      *
-     * @var \Magento\Framework\Registry\Registry
+     * @var \Magento\Framework\Registry
      */
     private $coreRegistry;
 
@@ -37,30 +34,27 @@ class Base extends \Magento\Framework\App\Action\Action
     private $_logger;
 
     /**
-     * @var \RealexPayments\HPP\API\RealexPaymentManagementInterface
+     * @var \RealexPayments\HPP\API\RealexPaymentManagementInterface|PaymentManagement
      */
     private $_paymentManagement;
 
     /**
      * Result constructor.
      *
-     * @param \Magento\Framework\App\Action\Context                    $context
-     * @param \RealexPayments\HPP\Helper\Data                          $helper
-     * @param \Magento\Sales\Model\OrderFactory                        $orderFactory
-     * @param \Magento\Framework\Registry                              $coreRegistry
-     * @param \RealexPayments\HPP\Logger\Logger                        $logger
-     * @param \RealexPayments\HPP\API\RealexPaymentManagementInterface $paymentManagement
+     * @param  \Magento\Framework\App\Action\Context  $context
+     * @param  \RealexPayments\HPP\Helper\Data  $helper
+     * @param  \Magento\Framework\Registry  $coreRegistry
+     * @param  \RealexPayments\HPP\Logger\Logger  $logger
+     * @param  \RealexPayments\HPP\API\RealexPaymentManagementInterface  $paymentManagement
      */
     public function __construct(
         \Magento\Framework\App\Action\Context $context,
         \RealexPayments\HPP\Helper\Data $helper,
-        \Magento\Sales\Model\OrderFactory $orderFactory,
         \Magento\Framework\Registry $coreRegistry,
         \RealexPayments\HPP\Logger\Logger $logger,
         \RealexPayments\HPP\API\RealexPaymentManagementInterface $paymentManagement
     ) {
         $this->_helper = $helper;
-        $this->_orderFactory = $orderFactory;
         $this->_url = $context->getUrl();
         $this->coreRegistry = $coreRegistry;
         $this->_logger = $logger;
@@ -81,7 +75,8 @@ class Base extends \Magento\Framework\App\Action\Action
             if ($response) {
                 $result = $this->_handleResponse($response);
                 $params['returnUrl'] = $this->_url
-                  ->getUrl('realexpayments_hpp/process/sessionresult', $this->_buildSessionParams($result));
+                    ->getUrl('realexpayments_hpp/process/sessionresult',
+                        $this->_buildSessionParams($result, $response));
             }
         } catch (\Exception $e) {
             $this->_logger->critical($e);
@@ -94,7 +89,7 @@ class Base extends \Magento\Framework\App\Action\Action
     }
 
     /**
-     * @param array $response
+     * @param  array  $response
      *
      * @return bool
      */
@@ -116,29 +111,55 @@ class Base extends \Magento\Framework\App\Action\Action
             return false;
         }
         //get the actual order id
-        list($incrementId, $orderTimestamp) = explode('_', $response['ORDER_ID']);
+        [$incrementId, $orderTimestamp] = explode('_', $response['ORDER_ID']);
 
-        if ($incrementId) {
-            $order = $this->_getOrder($incrementId);
-            if ($order->getId()) {
-                // process the response
-                return $this->_paymentManagement->processResponse($order, $response);
-            } else {
-                $this->_logger->critical(__('Gateway response has an invalid order id.'));
-
-                return false;
-            }
-        } else {
+        if (!$incrementId) {
             $this->_logger->critical(__('Gateway response does not have an order id.'));
 
             return false;
         }
+
+        $order = $this->_getOrder($incrementId);
+        if (!$order->getId()) {
+            $this->_logger->critical(__('Gateway response has an invalid order id.'));
+
+            return false;
+        }
+
+        if (!$this->_paymentManagement->isTransactionApm($response)) {
+            // process the response
+            return $this->_paymentManagement->processResponse($order, $response);
+        }
+
+        // apm scenario
+        $fieldsToLog = $this->_helper->stripFields($response);
+        $fieldsToLogString = '<b>Initial response</b> <br />';
+        $fieldsToLogList = [
+            'RESULT',
+            'MESSAGE',
+            'PASREF',
+            'ORDER_ID',
+            'TIMESTAMP',
+            'AMOUNT',
+            'HPP_APM_DESCRIPTOR',
+            'PAYMENTMETHOD'
+        ];
+        foreach ($fieldsToLog as $fieldToLogKey => $fieldToLogValue) {
+            if (!in_array($fieldToLogKey, $fieldsToLogList)) {
+                continue;
+            }
+
+            $fieldsToLogString .= htmlspecialchars("{$fieldToLogKey}: {$fieldToLogValue}", ENT_QUOTES,
+                    'UTF-8')."<br />";
+        }
+        $this->_paymentManagement->addHistoryComment($order, $fieldsToLogString);
+        return true;
     }
 
     /**
      * Validate response using sha1 signature.
      *
-     * @param array $response
+     * @param  array  $response
      *
      * @return bool
      */
@@ -148,16 +169,19 @@ class Base extends \Magento\Framework\App\Action\Action
         $result = $response['RESULT'];
         $orderid = $response['ORDER_ID'];
         $message = $response['MESSAGE'];
-        $authcode = $response['AUTHCODE'];
         $pasref = $response['PASREF'];
         $realexsha1 = $response['SHA1HASH'];
 
         $merchantid = $this->_helper->getConfigData('merchant_id');
 
-        $sha1hash = $this->_helper->signFields("$timestamp.$merchantid.$orderid.$result.$message.$pasref.$authcode");
+        if ($this->_paymentManagement->isTransactionApm($response)) {
+            $sha1hash = $this->_helper->signFields("$timestamp.$merchantid.$orderid.$result.$message.$pasref.");
+        } else {
+            $sha1hash = $this->_helper->signFields("$timestamp.$merchantid.$orderid.$result.$message.$pasref.{$response['AUTHCODE']}");
+        }
 
         //Check to see if hashes match or not
-        if ($sha1hash !== $realexsha1){
+        if ($sha1hash !== $realexsha1) {
             return false;
         }
 
@@ -167,24 +191,35 @@ class Base extends \Magento\Framework\App\Action\Action
     /**
      * Build params for the session redirect.
      *
-     * @param bool $result
+     * @param  bool  $result
      *
-     * @return array
+     * @param  array  $response
+     *
+     * @return array|bool
      */
-    private function _buildSessionParams($result)
+    private function _buildSessionParams($result, $response)
     {
         $result = ($result) ? '1' : '0';
         $timestamp = strftime('%Y%m%d%H%M%S');
         $merchantid = $this->_helper->getConfigData('merchant_id');
+        $isApmPending = $this->_paymentManagement->isTransactionApm($response) ? '1' : '0';
+
         // if no order id exists
-        if(!$this->_order) {
-          return false;
+        if (!$this->_order) {
+            return false;
+        } else {
+            $orderid = $this->_order->getIncrementId();
         }
-        else { $orderid = $this->_order->getIncrementId();
-        }
+
         $sha1hash = $this->_helper->signFields("$timestamp.$merchantid.$orderid.$result");
 
-        return ['timestamp' => $timestamp, 'order_id' => $orderid, 'result' => $result, 'hash' => $sha1hash];
+        return [
+            'timestamp' => $timestamp,
+            'order_id' => $orderid,
+            'result' => $result,
+            'hash' => $sha1hash,
+            'apm_pending' => $isApmPending
+        ];
     }
 
     /**
@@ -197,7 +232,7 @@ class Base extends \Magento\Framework\App\Action\Action
     private function _getOrder($incrementId)
     {
         if (!$this->_order) {
-            $this->_order = $this->_orderFactory->create()->loadByIncrementId($incrementId);
+            $this->_order = $this->_helper->getOrderByIncrement($incrementId);
         }
 
         return $this->_order;

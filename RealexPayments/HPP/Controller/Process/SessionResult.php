@@ -4,8 +4,8 @@ namespace RealexPayments\HPP\Controller\Process;
 
 use Magento\Framework\Controller\ResultFactory;
 use Magento\Sales\Api\Data\OrderInterface;
-use RealexPayments\HPP\API\RealexPaymentManagementInterface;
-use RealexPayments\HPP\Model\API\RealexPaymentManagement;
+use RealexPayments\HPP\Api\RealexPaymentManagementInterface;
+use RealexPayments\HPP\Model\Api\RealexPaymentManagement;
 
 class SessionResult extends \Magento\Framework\App\Action\Action
 {

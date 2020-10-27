@@ -1,8 +1,8 @@
 <?xml version="1.0"?>
 <config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
         xsi:noNamespaceSchemaLocation="urn:magento:framework:ObjectManager/etc/config.xsd">
-    <preference for="RealexPayments\HPP\API\RealexPaymentManagementInterface" type="RealexPayments\HPP\Model\API\RealexPaymentManagement" />
-    <preference for="RealexPayments\HPP\API\RemoteXMLInterface" type="RealexPayments\HPP\Model\API\RemoteXML" />
+    <preference for="RealexPayments\HPP\Api\RealexPaymentManagementInterface" type="RealexPayments\HPP\Model\Api\RealexPaymentManagement" />
+    <preference for="RealexPayments\HPP\Api\RemoteXMLInterface" type="RealexPayments\HPP\Model\Api\RemoteXML" />
     <type name="RealexPayments\HPP\Logger\Handler">
         <arguments>
             <argument name="filesystem" xsi:type="object">Magento\Framework\Filesystem\Driver\File</argument>

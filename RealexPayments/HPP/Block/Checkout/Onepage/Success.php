@@ -2,9 +2,9 @@
 
 namespace RealexPayments\HPP\Block\Checkout\Onepage;
 
-use RealexPayments\HPP\API\RealexPaymentManagementInterface;
+use RealexPayments\HPP\Api\RealexPaymentManagementInterface;
 use RealexPayments\HPP\Helper\Data;
-use RealexPayments\HPP\Model\API\RealexPaymentManagement;
+use RealexPayments\HPP\Model\Api\RealexPaymentManagement;
 
 class Success extends \Magento\Framework\View\Element\Template
 {

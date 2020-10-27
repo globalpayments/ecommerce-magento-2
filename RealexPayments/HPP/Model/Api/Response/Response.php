@@ -1,8 +1,8 @@
 <?php
 
-namespace RealexPayments\HPP\Model\API\Response;
+namespace RealexPayments\HPP\Model\Api\Response;
 
-use RealexPayments\HPP\Model\API\Request\Request;
+use RealexPayments\HPP\Model\Api\Request\Request;
 
 class Response
 {

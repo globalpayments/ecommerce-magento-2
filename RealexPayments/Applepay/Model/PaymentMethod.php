@@ -90,7 +90,7 @@ class PaymentMethod extends \Magento\Payment\Model\Method\AbstractMethod
     private $_helper;
 
     /**
-     * @var \RealexPayments\HPP\API\RemoteXMLInterface
+     * @var \RealexPayments\HPP\Api\RemoteXMLInterface
      */
     private $_remoteXml;
 
@@ -138,7 +138,7 @@ class PaymentMethod extends \Magento\Payment\Model\Method\AbstractMethod
         \Magento\Framework\App\RequestInterface $request,
         \Magento\Framework\UrlInterface $urlBuilder,
         \RealexPayments\HPP\Helper\Data $helper,
-        \RealexPayments\HPP\API\RemoteXMLInterface $remoteXml,
+        \RealexPayments\HPP\Api\RemoteXMLInterface $remoteXml,
         \Magento\Store\Model\StoreManagerInterface $storeManager,
         \Magento\Framework\Locale\ResolverInterface $resolver,
         \Magento\Framework\Model\Context $context,

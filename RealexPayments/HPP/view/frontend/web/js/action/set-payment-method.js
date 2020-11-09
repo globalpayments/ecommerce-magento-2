@@ -25,7 +25,7 @@ define(
             if (Array.isArray(attributes)) {
                 for (var i = 0; i < attributes.length; i++) {
                     var currentAttribute = attributes[i];
-                    paymentData['extension_attributes'][currentAttribute['code']] = currentAttribute['value'];
+                    paymentData.extension_attributes[currentAttribute.code] = currentAttribute.value;
                 }
             }
         }

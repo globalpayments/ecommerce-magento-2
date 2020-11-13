@@ -21,7 +21,7 @@ define(
             }
             // check if agreement is enabled if so add it to payload
             if (agreementsConfig.isEnabled) {
-                var agreementForm = $('.payment-method._active form[data-role=checkout-agreements]'),
+                var agreementForm = $('.payment-method._active div[data-role=checkout-agreements] input'),
                     agreementData = agreementForm.serializeArray(),
                     agreementIds = [];
 

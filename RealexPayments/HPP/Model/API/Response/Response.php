@@ -55,24 +55,45 @@ class Response
 
             return false;
         }
-        //read the minimum fields for validation
-        $timestamp = $doc['timestamp'];
+
+        // Read the minimum fields for validation.
+        $this->_array['TIMESTAMP'] = (string) $doc['timestamp'];
         $this->_array['MERCHANT_ID'] = (string) $doc->merchantid;
         $this->_array['ORDER_ID'] = (string) $doc->orderid;
         $this->_array['RESULT'] = (string) $doc->result;
         $this->_array['MESSAGE'] = (string) $doc->message;
         $this->_array['PASREF'] = (string) $doc->pasref;
-        $this->_array['AUTHCODE'] = (string) $doc->authcode;
-        //is this a valid response
+
         if ($this->_array['RESULT'] != '00') {
             $this->_logger->critical('Invalid response received from gateway:'.
                 print_r($this->_helper->stripFields($this->_array), true));
 
             return $this;
         }
-        //compute the hash
+
+
+        $paymentMethod = (string) $doc->paymentmethod;
+        if ($paymentMethod == 'paypal') {
+            return $this->_parsePaypalResponse($doc, $requestType);
+        }
+        else {
+            return $this->_parseResponse($doc, $requestType);
+        }
+    }
+
+    public function toArray()
+    {
+        return $this->_array;
+    }
+
+    private function _parseResponse($doc, $requestType)
+    {
+        // Read the minimum fields for validation.
+        $this->_array['AUTHCODE'] = (string) $doc->authcode;
+
+        // Compute the hash.
         $realexsha1 = (string) $doc->sha1hash;
-        $fieldsToSign = $timestamp.'.'.$this->_array['MERCHANT_ID'].'.'.
+        $fieldsToSign = $this->_array['TIMESTAMP'].'.'.$this->_array['MERCHANT_ID'].'.'.
             $this->_array['ORDER_ID'].'.'.$this->_array['RESULT'].'.'.$this->_array['MESSAGE'].'.'.
             $this->_array['PASREF'].'.'.$this->_array['AUTHCODE'];
         if (isset($requestType) && ($requestType == Request::TYPE_QUERY)) {
@@ -81,14 +102,15 @@ class Response
             $sha1hash = $this->_helper->signFields($fieldsToSign);
         }
 
-        //Check to see if hashes match or not
+        // Check to see if hashes match or not.
         if ($sha1hash !== $realexsha1){
             $this->_logger->critical('Bad response received from gateway:'.
                 print_r($this->_helper->stripFields($this->_array), true));
 
             return false;
         }
-        //set the rest of the fields
+
+        // Set the rest of the fields.
         $this->_array['ACCOUNT'] = (string) $doc->account;
         $this->_array['CVNRESULT'] = (string) $doc->cvnresult;
         $this->_array['AVSPOSTCODERESPONSE'] = (string) $doc->avspostcoderesponse;
@@ -103,8 +125,49 @@ class Response
         return $this;
     }
 
-    public function toArray()
+    private function _parsePaypalResponse($doc, $requestType)
     {
-        return $this->_array;
+        // Read the minimum fields for validation.
+        $this->_array['PAYMENTMETHOD'] = (string) $doc->paymentmethod;
+
+        // Compute the hash.
+        $realexsha1 = (string) $doc->sha1hash;
+        $fieldsToSign = $this->_array['TIMESTAMP'].'.'.$this->_array['MERCHANT_ID'].'.'.
+            $this->_array['ORDER_ID'].'.'.$this->_array['RESULT'].'.'.$this->_array['MESSAGE'].'.'.
+            $this->_array['PASREF'].'.'.$this->_array['PAYMENTMETHOD'];
+        $sha1hash = $this->_helper->signFields($fieldsToSign);
+
+        // Check to see if hashes match or not.
+        if ($sha1hash !== $realexsha1) {
+            $this->_logger->critical('Bad response received from gateway:'.
+                print_r($this->_helper->stripFields($this->_array), true));
+
+            return false;
+        }
+
+        // Set the rest of the fields.
+        $this->_array['ACCOUNT'] = (string) $doc->account;
+
+        if ($doc->paymentmethoddetails) {
+            $this->_parsePaypalPaymentDetails($doc->paymentmethoddetails);
+        }
+
+        return $this;
+    }
+
+    private function _parsePaypalPaymentDetails(\SimpleXMLElement $xml) {
+        $nodes = $xml->children();
+
+        if (0 === $nodes->count()) {
+            $value = strval($xml);
+            if ($value) {
+                $this->_array['PAYPAL_'.$xml->getName()] = $value;
+            }
+            return;
+        }
+
+        foreach ($nodes as $nodeXml) {
+            $this->_parsePaypalPaymentDetails($nodeXml);
+        }
     }
 }

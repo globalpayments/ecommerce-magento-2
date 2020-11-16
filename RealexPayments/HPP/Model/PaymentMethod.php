@@ -1307,12 +1307,19 @@ class PaymentMethod extends \Magento\Payment\Model\Method\AbstractMethod impleme
     {
         parent::capture($payment, $amount);
 
-        $currencyCode = $payment->getOrder()->getBaseCurrencyCode();
+        $order = $payment->getOrder();
+        $currencyCode = $order->getBaseCurrencyCode();
         $realexAmount = $this->_helper->amountFromMagento($amount, $currencyCode);
         if ($payment->getAdditionalInformation('AUTO_SETTLE_FLAG') != SettleMode::SETTLEMODE_MULTI) {
             $response = $this->_remoteXml->settle($payment, $realexAmount);
         } else {
-            $response = $this->_remoteXml->multisettle($payment, $realexAmount);
+            $grand_total = $order->getBaseGrandTotal();
+            $invoiced_total = $order->getBaseTotalInvoiced();
+            $response = $this->_remoteXml->multisettle(
+                $payment,
+                $realexAmount,
+                $invoiced_total + $amount >= $grand_total
+            );
         }
         if (!isset($response) || !$response) {
             throw new \Magento\Framework\Exception\LocalizedException(__('The capture action failed'));

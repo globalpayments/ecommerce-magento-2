@@ -66,9 +66,18 @@ class RemoteXML implements \RealexPayments\HPP\API\RemoteXMLInterface
     {
         $storeId = $payment->getOrder()->getStoreId();
         $additional = $payment->getAdditionalInformation();
-        $request = $this->_requestFactory->create()
+        $is_paypal = !empty($additional['PAYMENTMETHOD']) && $additional['PAYMENTMETHOD'] == 'paypal';
+
+        $request = $this->_requestFactory->create();
+        if ($is_paypal) {
+            $request->setPaymentMethod('paypal');
+            $request->setType(Request\Request::TYPE_PAYMENT_SETTLE);
+        }
+        else {
+            $request->setType(Request\Request::TYPE_SETTLE);
+        }
+        $request = $request
                     ->setStoreId($storeId)
-                    ->setType(Request\Request::TYPE_SETTLE)
                     ->setMerchantId($additional['MERCHANT_ID'])
                     ->setOrderId($additional['ORDER_ID'])
                     ->setPasref($additional['PASREF'])
@@ -81,19 +90,32 @@ class RemoteXML implements \RealexPayments\HPP\API\RemoteXMLInterface
     /**
      * {@inheritdoc}
      */
-    public function multisettle($payment, $amount)
+    public function multisettle($payment, $amount, $complete = false)
     {
-        $storeId = $payment->getOrder()->getStoreId();
+        $order = $payment->getOrder();
+        $storeId = $order->getStoreId();
         $additional = $payment->getAdditionalInformation();
-        $request = $this->_requestFactory->create()
+        $is_paypal = !empty($additional['PAYMENTMETHOD']) && $additional['PAYMENTMETHOD'] == 'paypal';
+
+        $request = $this->_requestFactory->create();
+        if ($is_paypal) {
+            $request->setPaymentMethod('paypal');
+            $request->setType(Request\Request::TYPE_PAYMENT_SETTLE);
+
+            $request->setMultiSettleType($complete ? 'complete' : 'partial');
+        }
+        else {
+            $request->setType(Request\Request::TYPE_MULTISETTLE);
+        }
+        $request = $request
                     ->setStoreId($storeId)
-                    ->setType(Request\Request::TYPE_MULTISETTLE)
                     ->setMerchantId($additional['MERCHANT_ID'])
                     ->setOrderId($additional['ORDER_ID'])
                     ->setPasref($additional['PASREF'])
                     ->setAccount($additional['ACCOUNT'])
                     ->setAuthCode($additional['AUTHCODE'])
                     ->setAmount($amount)
+                    ->setCurrency($payment->getOrder()->getBaseCurrencyCode())
                     ->build();
 
         return $this->_sendRequest($request);
@@ -110,19 +132,29 @@ class RemoteXML implements \RealexPayments\HPP\API\RemoteXMLInterface
         );
         $transaction = $this->_getTransaction($payment);
         $additional = $payment->getAdditionalInformation();
-        if ($additional['AUTO_SETTLE_FLAG'] == SettleMode::SETTLEMODE_MULTI) {
-            $orderId = '_multisettle_'.$additional['ORDER_ID'];
-            $rawFields = $transaction->getAdditionalInformation(
-                \Magento\Sales\Model\Order\Payment\Transaction::RAW_DETAILS
-            );
-            $pasref = $rawFields['PASREF'];
-        } else {
-            $orderId = $additional['ORDER_ID'];
+        $is_paypal = !empty($additional['PAYMENTMETHOD']) && $additional['PAYMENTMETHOD'] == 'paypal';
+        $orderId = $additional['ORDER_ID'];
+
+        $transactionAdditionalInfo = $transaction->getAdditionalInformation(
+            \Magento\Sales\Model\Order\Payment\Transaction::RAW_DETAILS
+        );
+
+        if (!empty($transactionAdditionalInfo['PASREF'])) {
+            $pasref = $transactionAdditionalInfo['PASREF'];
+        }
+        else {
             $pasref = $additional['PASREF'];
         }
-        $request = $this->_requestFactory->create()
-                  ->setStoreId($storeId)
-                  ->setType(Request\Request::TYPE_REBATE)
+
+        $request = $this->_requestFactory->create();
+        if ($is_paypal) {
+            $request->setPaymentMethod('paypal');
+            $request->setType(Request\Request::TYPE_PAYMENT_CREDIT);
+        }
+        else {
+            $request->setType(Request\Request::TYPE_REBATE);
+        }
+        $request = $request->setStoreId($storeId)
                   ->setMerchantId($additional['MERCHANT_ID'])
                   ->setAccount($additional['ACCOUNT'])
                   ->setOrderId($orderId)
@@ -154,9 +186,19 @@ class RemoteXML implements \RealexPayments\HPP\API\RemoteXMLInterface
         } else {
             $pasref = $additional['PASREF'];
         }
-        $request = $this->_requestFactory->create()
+
+        $is_paypal = !empty($additional['PAYMENTMETHOD']) && $additional['PAYMENTMETHOD'] == 'paypal';
+
+        $request = $this->_requestFactory->create();
+        if ($is_paypal) {
+            $request->setPaymentMethod('paypal');
+            $request->setType(Request\Request::TYPE_PAYMENT_VOID);
+        }
+        else {
+            $request->setType(Request\Request::TYPE_VOID);
+        }
+        $request = $request
                   ->setStoreId($storeId)
-                  ->setType(Request\Request::TYPE_VOID)
                   ->setMerchantId($additional['MERCHANT_ID'])
                   ->setAccount($additional['ACCOUNT'])
                   ->setOrderId($orderId)
@@ -247,8 +289,8 @@ class RemoteXML implements \RealexPayments\HPP\API\RemoteXMLInterface
     /**
      * @desc Send the request to the remote xml api
      *
-     * @param \RealexPayments\HPP\Model\API\Request\Request $request
-     * @param string                                        $requestType
+     * @param  string  $request
+     * @param  string  $requestType
      *
      * @return \RealexPayments\HPP\Model\API\Response\Response
      */

@@ -15,7 +15,7 @@ interface RemoteXMLInterface
      * @param \Magento\Payment\Model\InfoInterface $payment
      * @param int                                  $amount
      *
-     * @return bool
+     * @return \RealexPayments\HPP\Model\API\Response\Response
      */
     public function settle($payment, $amount);
 
@@ -24,10 +24,11 @@ interface RemoteXMLInterface
      *
      * @param \Magento\Payment\Model\InfoInterface $payment
      * @param int                                  $amount
+     * @param bool                                 $complete
      *
-     * @return bool
+     * @return \RealexPayments\HPP\Model\API\Response\Response
      */
-    public function multisettle($payment, $amount);
+    public function multisettle($payment, $amount, $complete = false);
 
     /**
      * Rebate a transaction with Realex using the Remote API.
@@ -36,7 +37,7 @@ interface RemoteXMLInterface
      * @param int                                                 $amount
      * @param array \Magento\Sales\Model\Order\Creditmemo\Comment $comments
      *
-     * @return bool
+     * @return \RealexPayments\HPP\Model\API\Response\Response
      */
     public function rebate($payment, $amount, $comments);
 
@@ -46,7 +47,7 @@ interface RemoteXMLInterface
      * @param \Magento\Payment\Model\InfoInterface                $payment
      * @param array \Magento\Sales\Model\Order\Creditmemo\Comment $comments
      *
-     * @return bool
+     * @return \RealexPayments\HPP\Model\API\Response\Response
      */
     public function void($payment, $comments);
 
@@ -58,7 +59,7 @@ interface RemoteXMLInterface
      * @param string                                       $payerRef
      * @param \Magento\Customer\Api\Data\CustomerInterface $customer
      *
-     * @return bool
+     * @return \RealexPayments\HPP\Model\API\Response\Response
      */
     public function payerEdit($merchantId, $account, $payerRef, $customer);
 
@@ -68,7 +69,7 @@ interface RemoteXMLInterface
      * @param \Magento\Payment\Model\InfoInterface                $payment
      * @param array \Magento\Sales\Model\Order\Creditmemo\Comment $comments
      *
-     * @return bool
+     * @return \RealexPayments\HPP\Model\API\Response\Response
      */
     public function releasePayment($payment, $comments);
 
@@ -78,7 +79,7 @@ interface RemoteXMLInterface
      * @param \Magento\Payment\Model\InfoInterface                $payment
      * @param array \Magento\Sales\Model\Order\Creditmemo\Comment $comments
      *
-     * @return bool
+     * @return \RealexPayments\HPP\Model\API\Response\Response
      */
     public function holdPayment($payment, $comments);
 
@@ -87,7 +88,7 @@ interface RemoteXMLInterface
      *
      * @param \Magento\Payment\Model\InfoInterface $payment
      *
-     * @return bool
+     * @return \RealexPayments\HPP\Model\API\Response\Response
      */
     public function query($payment);
 }

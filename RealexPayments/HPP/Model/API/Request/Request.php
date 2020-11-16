@@ -167,16 +167,15 @@ class Request
      *
      * @return string
      */
-    public function build() {
+    public function build()
+    {
         if ($this->_paymentMethod == 'paypal') {
             if ($this->_type == self::TYPE_PAYMENT_SETTLE) {
                 return $this->_buildPaypalSettleRequestXml();
-            }
-            else {
+            } else {
                 return $this->_buildPaypalRequestXml();
             }
-        }
-        else {
+        } else {
             return $this->_buildRequestXml();
         }
     }

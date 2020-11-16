@@ -71,12 +71,10 @@ class Response
             return $this;
         }
 
-
         $paymentMethod = (string) $doc->paymentmethod;
         if ($paymentMethod == 'paypal') {
             return $this->_parsePaypalResponse($doc, $requestType);
-        }
-        else {
+        } else {
             return $this->_parseResponse($doc, $requestType);
         }
     }
@@ -103,7 +101,7 @@ class Response
         }
 
         // Check to see if hashes match or not.
-        if ($sha1hash !== $realexsha1){
+        if ($sha1hash !== $realexsha1) {
             $this->_logger->critical('Bad response received from gateway:'.
                 print_r($this->_helper->stripFields($this->_array), true));
 
@@ -155,11 +153,12 @@ class Response
         return $this;
     }
 
-    private function _parsePaypalPaymentDetails(\SimpleXMLElement $xml) {
+    private function _parsePaypalPaymentDetails(\SimpleXMLElement $xml)
+    {
         $nodes = $xml->children();
 
         if (0 === $nodes->count()) {
-            $value = strval($xml);
+            $value = (string) $xml;
             if ($value) {
                 $this->_array['PAYPAL_'.$xml->getName()] = $value;
             }

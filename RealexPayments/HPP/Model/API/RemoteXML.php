@@ -72,8 +72,7 @@ class RemoteXML implements \RealexPayments\HPP\API\RemoteXMLInterface
         if ($is_paypal) {
             $request->setPaymentMethod('paypal');
             $request->setType(Request\Request::TYPE_PAYMENT_SETTLE);
-        }
-        else {
+        } else {
             $request->setType(Request\Request::TYPE_SETTLE);
         }
         $request = $request
@@ -103,8 +102,7 @@ class RemoteXML implements \RealexPayments\HPP\API\RemoteXMLInterface
             $request->setType(Request\Request::TYPE_PAYMENT_SETTLE);
 
             $request->setMultiSettleType($complete ? 'complete' : 'partial');
-        }
-        else {
+        } else {
             $request->setType(Request\Request::TYPE_MULTISETTLE);
         }
         $request = $request
@@ -141,8 +139,7 @@ class RemoteXML implements \RealexPayments\HPP\API\RemoteXMLInterface
 
         if (!empty($transactionAdditionalInfo['PASREF'])) {
             $pasref = $transactionAdditionalInfo['PASREF'];
-        }
-        else {
+        } else {
             $pasref = $additional['PASREF'];
         }
 
@@ -150,8 +147,7 @@ class RemoteXML implements \RealexPayments\HPP\API\RemoteXMLInterface
         if ($is_paypal) {
             $request->setPaymentMethod('paypal');
             $request->setType(Request\Request::TYPE_PAYMENT_CREDIT);
-        }
-        else {
+        } else {
             $request->setType(Request\Request::TYPE_REBATE);
         }
         $request = $request->setStoreId($storeId)
@@ -193,8 +189,7 @@ class RemoteXML implements \RealexPayments\HPP\API\RemoteXMLInterface
         if ($is_paypal) {
             $request->setPaymentMethod('paypal');
             $request->setType(Request\Request::TYPE_PAYMENT_VOID);
-        }
-        else {
+        } else {
             $request->setType(Request\Request::TYPE_VOID);
         }
         $request = $request

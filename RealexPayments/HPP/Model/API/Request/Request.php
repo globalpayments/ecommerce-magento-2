@@ -240,9 +240,7 @@ class Request
         $this->_startXmlWriter();
         $this->_addSimpleElement('merchantId');
         $this->_addSimpleElement('account');
-        if ($this->_multiSettleType) {
-            $this->_addAmount();
-        }
+        $this->_addAmount();
         $this->_addSimpleElement('orderId');
         $this->_addSimpleElement('pasRef');
 
@@ -262,8 +260,8 @@ class Request
             $this->_timestamp,
             $this->_merchantId,
             $this->_orderId,
-            $this->_multiSettleType ? $this->_amount : '',
-            $this->_multiSettleType ? $this->_currency : '',
+            $this->_amount,
+            $this->_currency,
             $this->_paymentMethod,
         ]);
 

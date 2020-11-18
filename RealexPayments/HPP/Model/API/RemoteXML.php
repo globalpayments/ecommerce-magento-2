@@ -64,7 +64,8 @@ class RemoteXML implements \RealexPayments\HPP\API\RemoteXMLInterface
      */
     public function settle($payment, $amount)
     {
-        $storeId = $payment->getOrder()->getStoreId();
+        $order = $payment->getOrder();
+        $storeId = $order->getStoreId();
         $additional = $payment->getAdditionalInformation();
         $is_paypal = !empty($additional['PAYMENTMETHOD']) && $additional['PAYMENTMETHOD'] == 'paypal';
 
@@ -81,6 +82,7 @@ class RemoteXML implements \RealexPayments\HPP\API\RemoteXMLInterface
                     ->setOrderId($additional['ORDER_ID'])
                     ->setPasref($additional['PASREF'])
                     ->setAmount($amount)
+                    ->setCurrency($order->getBaseCurrencyCode())
                     ->build();
 
         return $this->_sendRequest($request);
@@ -113,7 +115,7 @@ class RemoteXML implements \RealexPayments\HPP\API\RemoteXMLInterface
                     ->setAccount($additional['ACCOUNT'])
                     ->setAuthCode($additional['AUTHCODE'])
                     ->setAmount($amount)
-                    ->setCurrency($payment->getOrder()->getBaseCurrencyCode())
+                    ->setCurrency($order->getBaseCurrencyCode())
                     ->build();
 
         return $this->_sendRequest($request);

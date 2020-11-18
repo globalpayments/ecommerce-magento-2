@@ -7,7 +7,25 @@ use Magento\Sales\Model\Order as parentOrder;
 class Order extends parentOrder
 {
     /**
-     * @return $this
+     * {@inheritdoc}
+     */
+    public function canHold()
+    {
+        // Hold is not supported when payment method is Paypal.
+        return $this->isOrderWithPaypal() ? false : parent::canHold();
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    public function canUnhold()
+    {
+        // Unhold is not supported when payment method is Paypal.
+        return $this->isOrderWithPaypal() ? false : parent::canUnhold();
+    }
+
+    /**
+     * {@inheritdoc}
      */
     public function hold()
     {
@@ -19,7 +37,7 @@ class Order extends parentOrder
     }
 
     /**
-     * @return $this
+     * {@inheritdoc}
      */
     public function unhold()
     {
@@ -67,5 +85,26 @@ class Order extends parentOrder
         }
 
         return true;
+    }
+
+    /**
+     * Check if order was created using Paypal.
+     *
+     * @return bool
+     */
+    protected function isOrderWithPaypal()
+    {
+        $payment = $this->getPayment();
+
+        if ($payment->getMethod() == PaymentMethod::METHOD_CODE) {
+            $additionalInformation = $payment->getAdditionalInformation();
+            if (isset($additionalInformation['PAYMENTMETHOD'])
+                && $additionalInformation['PAYMENTMETHOD'] == 'paypal'
+            ) {
+                return true;
+            }
+        }
+
+        return false;
     }
 }

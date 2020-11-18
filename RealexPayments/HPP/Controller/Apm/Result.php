@@ -15,10 +15,10 @@ use Magento\Framework\Phrase;
 use Magento\Framework\UrlInterface;
 use Magento\Sales\Model\Order;
 use Magento\Sales\Model\OrderRepository;
-use RealexPayments\HPP\API\RealexPaymentManagementInterface;
+use RealexPayments\HPP\Api\RealexPaymentManagementInterface;
 use RealexPayments\HPP\Helper\Data;
 use RealexPayments\HPP\Logger\Logger;
-use RealexPayments\HPP\Model\API\RealexPaymentManagement;
+use RealexPayments\HPP\Model\Api\RealexPaymentManagement;
 
 /**
  * Class Result

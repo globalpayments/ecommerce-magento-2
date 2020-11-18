@@ -1,6 +1,6 @@
 <?php
 
-namespace RealexPayments\HPP\API;
+namespace RealexPayments\HPP\Api;
 
 /**
  * Interface RealexPaymentManagementInterface.

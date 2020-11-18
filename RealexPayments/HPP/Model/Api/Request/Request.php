@@ -1,6 +1,6 @@
 <?php
 
-namespace RealexPayments\HPP\Model\API\Request;
+namespace RealexPayments\HPP\Model\Api\Request;
 
 class Request
 {

@@ -11,7 +11,26 @@ define(
         'use strict';
         var agreementsConfig = window.checkoutConfig.checkoutAgreements;
 
-        return function() {
+        /**
+         * This function adds extension attributes to paymentData
+         * the attributes param must be an array of objects,
+         * with each object having a code and a value.
+         * You also need to add those attributes to your extension_attributes.xml,
+         * where they need to be set for: Magento\Quote\Api\Data\PaymentInterface
+         *
+         * @param attributes
+         * @param paymentData
+         */
+        var addExtensionAttributes = function(attributes, paymentData) {
+            if (Array.isArray(attributes)) {
+                for (var i = 0; i < attributes.length; i++) {
+                    var currentAttribute = attributes[i];
+                    paymentData.extension_attributes[currentAttribute.code] = currentAttribute.value;
+                }
+            }
+        }
+
+        return function(extensionAttributes) {
 
             var serviceUrl,
                 payload,
@@ -21,7 +40,7 @@ define(
             }
             // check if agreement is enabled if so add it to payload
             if (agreementsConfig.isEnabled) {
-                var agreementForm = $('.payment-method._active form[data-role=checkout-agreements]'),
+                var agreementForm = $('.payment-method._active div[data-role=checkout-agreements] input'),
                     agreementData = agreementForm.serializeArray(),
                     agreementIds = [];
 
@@ -32,6 +51,17 @@ define(
                 paymentData.extension_attributes = {
                     agreement_ids: agreementIds
                 };
+            }
+
+            /**
+             * If we have the extensionAttributes parameter,
+             * we add them to the paymentData object
+             */
+            if (extensionAttributes && extensionAttributes.length > 0) {
+                if (!paymentData.extension_attributes) {
+                    paymentData.extension_attributes = {};
+                }
+                addExtensionAttributes(extensionAttributes, paymentData);
             }
 
             /** Checkout for guest and registered customer. */

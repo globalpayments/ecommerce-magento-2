@@ -90,7 +90,7 @@ class PaymentMethod extends \Magento\Payment\Model\Method\AbstractMethod
     private $_helper;
 
     /**
-     * @var \RealexPayments\HPP\API\RemoteXMLInterface
+     * @var \RealexPayments\HPP\Api\RemoteXMLInterface
      */
     private $_remoteXml;
 

@@ -1,10 +1,10 @@
 <?php
 
-namespace RealexPayments\HPP\Model\API;
+namespace RealexPayments\HPP\Model\Api;
 
 use RealexPayments\HPP\Model\Config\Source\SettleMode;
 
-class RemoteXML implements \RealexPayments\HPP\API\RemoteXMLInterface
+class RemoteXML implements \RealexPayments\HPP\Api\RemoteXMLInterface
 {
     /**
      * @var \RealexPayments\HPP\Helper\Data
@@ -17,12 +17,12 @@ class RemoteXML implements \RealexPayments\HPP\API\RemoteXMLInterface
     private $_logger;
 
     /**
-     * @var \RealexPayments\HPP\Model\API\Request\RequestFactory
+     * @var \RealexPayments\HPP\Model\Api\Request\RequestFactory
      */
     private $_requestFactory;
 
     /**
-     * @var \RealexPayments\HPP\Model\API\Response\ResponseFactory
+     * @var \RealexPayments\HPP\Model\Api\Response\ResponseFactory
      */
     private $_responseFactory;
 
@@ -41,15 +41,15 @@ class RemoteXML implements \RealexPayments\HPP\API\RemoteXMLInterface
      *
      * @param \RealexPayments\HPP\Helper\Data                        $helper
      * @param \RealexPayments\HPP\Logger\Logger                      $logger
-     * @param \RealexPayments\HPP\Model\API\Request\RequestFactory   $requestFactory
-     * @param \RealexPayments\HPP\Model\API\Response\ResponseFactory $responseFactory
+     * @param \RealexPayments\HPP\Model\Api\Request\RequestFactory   $requestFactory
+     * @param \RealexPayments\HPP\Model\Api\Response\ResponseFactory $responseFactory
      * @param \Magento\Sales\Api\TransactionRepositoryInterface      $transactionRepository
      */
     public function __construct(
         \RealexPayments\HPP\Helper\Data $helper,
         \RealexPayments\HPP\Logger\Logger $logger,
-        \RealexPayments\HPP\Model\API\Request\RequestFactory $requestFactory,
-        \RealexPayments\HPP\Model\API\Response\ResponseFactory $responseFactory,
+        \RealexPayments\HPP\Model\Api\Request\RequestFactory $requestFactory,
+        \RealexPayments\HPP\Model\Api\Response\ResponseFactory $responseFactory,
         \Magento\Sales\Api\TransactionRepositoryInterface $transactionRepository
     ) {
         $this->_helper = $helper;
@@ -289,7 +289,7 @@ class RemoteXML implements \RealexPayments\HPP\API\RemoteXMLInterface
      * @param  string  $request
      * @param  string  $requestType
      *
-     * @return \RealexPayments\HPP\Model\API\Response\Response
+     * @return \RealexPayments\HPP\Model\Api\Response\Response
      */
     private function _sendRequest($request, $requestType = '')
     {

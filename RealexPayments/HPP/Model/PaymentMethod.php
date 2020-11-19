@@ -98,7 +98,7 @@ class PaymentMethod extends \Magento\Payment\Model\Method\AbstractMethod impleme
     private $_helper;
 
     /**
-     * @var \RealexPayments\HPP\API\RemoteXMLInterface
+     * @var \RealexPayments\HPP\Api\RemoteXMLInterface
      */
     private $_remoteXml;
 
@@ -148,7 +148,7 @@ class PaymentMethod extends \Magento\Payment\Model\Method\AbstractMethod impleme
      * @param \Magento\Framework\App\RequestInterface $request
      * @param \Magento\Framework\UrlInterface $urlBuilder
      * @param \RealexPayments\HPP\Helper\Data $helper
-     * @param \RealexPayments\HPP\API\RemoteXMLInterface $remoteXml
+     * @param \RealexPayments\HPP\Api\RemoteXMLInterface $remoteXml
      * @param \Magento\Store\Model\StoreManagerInterface $storeManager
      * @param \Magento\Framework\Locale\ResolverInterface $resolver
      * @param \Magento\Framework\Model\Context $context
@@ -171,7 +171,7 @@ class PaymentMethod extends \Magento\Payment\Model\Method\AbstractMethod impleme
         \Magento\Framework\App\RequestInterface $request,
         \Magento\Framework\UrlInterface $urlBuilder,
         \RealexPayments\HPP\Helper\Data $helper,
-        \RealexPayments\HPP\API\RemoteXMLInterface $remoteXml,
+        \RealexPayments\HPP\Api\RemoteXMLInterface $remoteXml,
         \Magento\Store\Model\StoreManagerInterface $storeManager,
         \Magento\Framework\Locale\ResolverInterface $resolver,
         \Magento\Framework\Model\Context $context,
@@ -1307,12 +1307,19 @@ class PaymentMethod extends \Magento\Payment\Model\Method\AbstractMethod impleme
     {
         parent::capture($payment, $amount);
 
-        $currencyCode = $payment->getOrder()->getBaseCurrencyCode();
+        $order = $payment->getOrder();
+        $currencyCode = $order->getBaseCurrencyCode();
         $realexAmount = $this->_helper->amountFromMagento($amount, $currencyCode);
         if ($payment->getAdditionalInformation('AUTO_SETTLE_FLAG') != SettleMode::SETTLEMODE_MULTI) {
             $response = $this->_remoteXml->settle($payment, $realexAmount);
         } else {
-            $response = $this->_remoteXml->multisettle($payment, $realexAmount);
+            $grand_total = $order->getBaseGrandTotal();
+            $invoiced_total = $order->getBaseTotalInvoiced();
+            $response = $this->_remoteXml->multisettle(
+                $payment,
+                $realexAmount,
+                $invoiced_total + $amount >= $grand_total
+            );
         }
         if (!isset($response) || !$response) {
             throw new \Magento\Framework\Exception\LocalizedException(__('The capture action failed'));

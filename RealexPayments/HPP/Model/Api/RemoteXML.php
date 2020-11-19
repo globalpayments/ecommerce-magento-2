@@ -1,10 +1,10 @@
 <?php
 
-namespace RealexPayments\HPP\Model\API;
+namespace RealexPayments\HPP\Model\Api;
 
 use RealexPayments\HPP\Model\Config\Source\SettleMode;
 
-class RemoteXML implements \RealexPayments\HPP\API\RemoteXMLInterface
+class RemoteXML implements \RealexPayments\HPP\Api\RemoteXMLInterface
 {
     /**
      * @var \RealexPayments\HPP\Helper\Data
@@ -17,12 +17,12 @@ class RemoteXML implements \RealexPayments\HPP\API\RemoteXMLInterface
     private $_logger;
 
     /**
-     * @var \RealexPayments\HPP\Model\API\Request\RequestFactory
+     * @var \RealexPayments\HPP\Model\Api\Request\RequestFactory
      */
     private $_requestFactory;
 
     /**
-     * @var \RealexPayments\HPP\Model\API\Response\ResponseFactory
+     * @var \RealexPayments\HPP\Model\Api\Response\ResponseFactory
      */
     private $_responseFactory;
 
@@ -41,15 +41,15 @@ class RemoteXML implements \RealexPayments\HPP\API\RemoteXMLInterface
      *
      * @param \RealexPayments\HPP\Helper\Data                        $helper
      * @param \RealexPayments\HPP\Logger\Logger                      $logger
-     * @param \RealexPayments\HPP\Model\API\Request\RequestFactory   $requestFactory
-     * @param \RealexPayments\HPP\Model\API\Response\ResponseFactory $responseFactory
+     * @param \RealexPayments\HPP\Model\Api\Request\RequestFactory   $requestFactory
+     * @param \RealexPayments\HPP\Model\Api\Response\ResponseFactory $responseFactory
      * @param \Magento\Sales\Api\TransactionRepositoryInterface      $transactionRepository
      */
     public function __construct(
         \RealexPayments\HPP\Helper\Data $helper,
         \RealexPayments\HPP\Logger\Logger $logger,
-        \RealexPayments\HPP\Model\API\Request\RequestFactory $requestFactory,
-        \RealexPayments\HPP\Model\API\Response\ResponseFactory $responseFactory,
+        \RealexPayments\HPP\Model\Api\Request\RequestFactory $requestFactory,
+        \RealexPayments\HPP\Model\Api\Response\ResponseFactory $responseFactory,
         \Magento\Sales\Api\TransactionRepositoryInterface $transactionRepository
     ) {
         $this->_helper = $helper;
@@ -64,15 +64,25 @@ class RemoteXML implements \RealexPayments\HPP\API\RemoteXMLInterface
      */
     public function settle($payment, $amount)
     {
-        $storeId = $payment->getOrder()->getStoreId();
+        $order = $payment->getOrder();
+        $storeId = $order->getStoreId();
         $additional = $payment->getAdditionalInformation();
-        $request = $this->_requestFactory->create()
+        $is_paypal = !empty($additional['PAYMENTMETHOD']) && $additional['PAYMENTMETHOD'] == 'paypal';
+
+        $request = $this->_requestFactory->create();
+        if ($is_paypal) {
+            $request->setPaymentMethod('paypal');
+            $request->setType(Request\Request::TYPE_PAYMENT_SETTLE);
+        } else {
+            $request->setType(Request\Request::TYPE_SETTLE);
+        }
+        $request = $request
                     ->setStoreId($storeId)
-                    ->setType(Request\Request::TYPE_SETTLE)
                     ->setMerchantId($additional['MERCHANT_ID'])
                     ->setOrderId($additional['ORDER_ID'])
                     ->setPasref($additional['PASREF'])
                     ->setAmount($amount)
+                    ->setCurrency($order->getBaseCurrencyCode())
                     ->build();
 
         return $this->_sendRequest($request);
@@ -81,19 +91,31 @@ class RemoteXML implements \RealexPayments\HPP\API\RemoteXMLInterface
     /**
      * {@inheritdoc}
      */
-    public function multisettle($payment, $amount)
+    public function multisettle($payment, $amount, $complete = false)
     {
-        $storeId = $payment->getOrder()->getStoreId();
+        $order = $payment->getOrder();
+        $storeId = $order->getStoreId();
         $additional = $payment->getAdditionalInformation();
-        $request = $this->_requestFactory->create()
+        $is_paypal = !empty($additional['PAYMENTMETHOD']) && $additional['PAYMENTMETHOD'] == 'paypal';
+
+        $request = $this->_requestFactory->create();
+        if ($is_paypal) {
+            $request->setPaymentMethod('paypal');
+            $request->setType(Request\Request::TYPE_PAYMENT_SETTLE);
+
+            $request->setMultiSettleType($complete ? 'complete' : 'partial');
+        } else {
+            $request->setType(Request\Request::TYPE_MULTISETTLE);
+        }
+        $request = $request
                     ->setStoreId($storeId)
-                    ->setType(Request\Request::TYPE_MULTISETTLE)
                     ->setMerchantId($additional['MERCHANT_ID'])
                     ->setOrderId($additional['ORDER_ID'])
                     ->setPasref($additional['PASREF'])
                     ->setAccount($additional['ACCOUNT'])
                     ->setAuthCode($additional['AUTHCODE'])
                     ->setAmount($amount)
+                    ->setCurrency($order->getBaseCurrencyCode())
                     ->build();
 
         return $this->_sendRequest($request);
@@ -110,19 +132,27 @@ class RemoteXML implements \RealexPayments\HPP\API\RemoteXMLInterface
         );
         $transaction = $this->_getTransaction($payment);
         $additional = $payment->getAdditionalInformation();
-        if ($additional['AUTO_SETTLE_FLAG'] == SettleMode::SETTLEMODE_MULTI) {
-            $orderId = '_multisettle_'.$additional['ORDER_ID'];
-            $rawFields = $transaction->getAdditionalInformation(
-                \Magento\Sales\Model\Order\Payment\Transaction::RAW_DETAILS
-            );
-            $pasref = $rawFields['PASREF'];
+        $is_paypal = !empty($additional['PAYMENTMETHOD']) && $additional['PAYMENTMETHOD'] == 'paypal';
+        $orderId = $additional['ORDER_ID'];
+
+        $transactionAdditionalInfo = $transaction->getAdditionalInformation(
+            \Magento\Sales\Model\Order\Payment\Transaction::RAW_DETAILS
+        );
+
+        if (!empty($transactionAdditionalInfo['PASREF'])) {
+            $pasref = $transactionAdditionalInfo['PASREF'];
         } else {
-            $orderId = $additional['ORDER_ID'];
             $pasref = $additional['PASREF'];
         }
-        $request = $this->_requestFactory->create()
-                  ->setStoreId($storeId)
-                  ->setType(Request\Request::TYPE_REBATE)
+
+        $request = $this->_requestFactory->create();
+        if ($is_paypal) {
+            $request->setPaymentMethod('paypal');
+            $request->setType(Request\Request::TYPE_PAYMENT_CREDIT);
+        } else {
+            $request->setType(Request\Request::TYPE_REBATE);
+        }
+        $request = $request->setStoreId($storeId)
                   ->setMerchantId($additional['MERCHANT_ID'])
                   ->setAccount($additional['ACCOUNT'])
                   ->setOrderId($orderId)
@@ -154,9 +184,18 @@ class RemoteXML implements \RealexPayments\HPP\API\RemoteXMLInterface
         } else {
             $pasref = $additional['PASREF'];
         }
-        $request = $this->_requestFactory->create()
+
+        $is_paypal = !empty($additional['PAYMENTMETHOD']) && $additional['PAYMENTMETHOD'] == 'paypal';
+
+        $request = $this->_requestFactory->create();
+        if ($is_paypal) {
+            $request->setPaymentMethod('paypal');
+            $request->setType(Request\Request::TYPE_PAYMENT_VOID);
+        } else {
+            $request->setType(Request\Request::TYPE_VOID);
+        }
+        $request = $request
                   ->setStoreId($storeId)
-                  ->setType(Request\Request::TYPE_VOID)
                   ->setMerchantId($additional['MERCHANT_ID'])
                   ->setAccount($additional['ACCOUNT'])
                   ->setOrderId($orderId)
@@ -247,10 +286,10 @@ class RemoteXML implements \RealexPayments\HPP\API\RemoteXMLInterface
     /**
      * @desc Send the request to the remote xml api
      *
-     * @param \RealexPayments\HPP\Model\API\Request\Request $request
-     * @param string                                        $requestType
+     * @param  string  $request
+     * @param  string  $requestType
      *
-     * @return \RealexPayments\HPP\Model\API\Response\Response
+     * @return \RealexPayments\HPP\Model\Api\Response\Response
      */
     private function _sendRequest($request, $requestType = '')
     {

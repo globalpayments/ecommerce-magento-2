@@ -34,7 +34,7 @@ class Base extends \Magento\Framework\App\Action\Action
     private $_logger;
 
     /**
-     * @var \RealexPayments\HPP\API\RealexPaymentManagementInterface|PaymentManagement
+     * @var \RealexPayments\HPP\Api\RealexPaymentManagementInterface|PaymentManagement
      */
     private $_paymentManagement;
 
@@ -45,14 +45,14 @@ class Base extends \Magento\Framework\App\Action\Action
      * @param  \RealexPayments\HPP\Helper\Data  $helper
      * @param  \Magento\Framework\Registry  $coreRegistry
      * @param  \RealexPayments\HPP\Logger\Logger  $logger
-     * @param  \RealexPayments\HPP\API\RealexPaymentManagementInterface  $paymentManagement
+     * @param  \RealexPayments\HPP\Api\RealexPaymentManagementInterface  $paymentManagement
      */
     public function __construct(
         \Magento\Framework\App\Action\Context $context,
         \RealexPayments\HPP\Helper\Data $helper,
         \Magento\Framework\Registry $coreRegistry,
         \RealexPayments\HPP\Logger\Logger $logger,
-        \RealexPayments\HPP\API\RealexPaymentManagementInterface $paymentManagement
+        \RealexPayments\HPP\Api\RealexPaymentManagementInterface $paymentManagement
     ) {
         $this->_helper = $helper;
         $this->_url = $context->getUrl();

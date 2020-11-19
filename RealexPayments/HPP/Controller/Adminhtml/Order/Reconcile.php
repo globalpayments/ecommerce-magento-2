@@ -16,7 +16,7 @@ class Reconcile extends \Magento\Sales\Controller\Adminhtml\Order
     const ADMIN_RESOURCE = 'RealexPayments_HPP::actions_reconcile';
 
     /**
-     * @var \RealexPayments\HPP\API\RealexPaymentManagementInterface
+     * @var \RealexPayments\HPP\Api\RealexPaymentManagementInterface
      */
     private $_paymentManagement;
 
@@ -32,7 +32,7 @@ class Reconcile extends \Magento\Sales\Controller\Adminhtml\Order
         OrderManagementInterface $orderManagement,
         OrderRepositoryInterface $orderRepository,
         LoggerInterface $logger,
-        \RealexPayments\HPP\API\RealexPaymentManagementInterface $paymentManagement
+        \RealexPayments\HPP\Api\RealexPaymentManagementInterface $paymentManagement
     ) {
         $this->_paymentManagement = $paymentManagement;
         parent::__construct($context, $coreRegistry, $fileFactory, $translateInline, $resultPageFactory, $resultJsonFactory, $resultLayoutFactory, $resultRawFactory, $orderManagement, $orderRepository, $logger);

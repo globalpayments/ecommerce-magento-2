@@ -1,13 +1,13 @@
 <?php
 
-namespace RealexPayments\HPP\Model\API;
+namespace RealexPayments\HPP\Model\Api;
 
 use Magento\Sales\Api\Data\OrderInterface;
 use Magento\Sales\Api\OrderRepositoryInterface;
 use Magento\Sales\Model\Order;
 use RealexPayments\HPP\Model\Config\Source\SettleMode;
 
-class RealexPaymentManagement implements \RealexPayments\HPP\API\RealexPaymentManagementInterface
+class RealexPaymentManagement implements \RealexPayments\HPP\Api\RealexPaymentManagementInterface
 {
     const FRAUD_ACTIVE = 'ACTIVE';
     const FRAUD_HOLD = 'HOLD';
@@ -18,7 +18,7 @@ class RealexPaymentManagement implements \RealexPayments\HPP\API\RealexPaymentMa
     private $_helper;
 
     /**
-     * @var \RealexPayments\HPP\API\RemoteXMLInterface
+     * @var \RealexPayments\HPP\Api\RemoteXMLInterface
      */
     private $_remoteXml;
 
@@ -59,7 +59,7 @@ class RealexPaymentManagement implements \RealexPayments\HPP\API\RealexPaymentMa
      * RealexPaymentManagement constructor.
      *
      * @param  \RealexPayments\HPP\Helper\Data  $helper
-     * @param  \RealexPayments\HPP\API\RemoteXMLInterface  $remoteXml
+     * @param  \RealexPayments\HPP\Api\RemoteXMLInterface  $remoteXml
      * @param  \Magento\Checkout\Model\Session  $session
      * @param  \Magento\Sales\Model\Order\Payment\Transaction\BuilderInterface  $transactionBuilder
      * @param  \RealexPayments\HPP\Logger\Logger  $logger
@@ -70,7 +70,7 @@ class RealexPaymentManagement implements \RealexPayments\HPP\API\RealexPaymentMa
      */
     public function __construct(
         \RealexPayments\HPP\Helper\Data $helper,
-        \RealexPayments\HPP\API\RemoteXMLInterface $remoteXml,
+        \RealexPayments\HPP\Api\RemoteXMLInterface $remoteXml,
         \Magento\Checkout\Model\Session $session,
         \Magento\Sales\Model\Order\Payment\Transaction\BuilderInterface $transactionBuilder,
         \RealexPayments\HPP\Logger\Logger $logger,

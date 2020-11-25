@@ -72,8 +72,8 @@ class Response
         }
 
         $paymentMethod = (string) $doc->paymentmethod;
-        if ($paymentMethod == 'paypal') {
-            return $this->_parsePaypalResponse($doc, $requestType);
+        if ($paymentMethod) {
+            return $this->_parseApmResponse($doc, $requestType);
         } else {
             return $this->_parseResponse($doc, $requestType);
         }
@@ -123,7 +123,7 @@ class Response
         return $this;
     }
 
-    private function _parsePaypalResponse($doc, $requestType)
+    private function _parseApmResponse($doc, $requestType)
     {
         // Read the minimum fields for validation.
         $this->_array['PAYMENTMETHOD'] = (string) $doc->paymentmethod;
@@ -147,26 +147,27 @@ class Response
         $this->_array['ACCOUNT'] = (string) $doc->account;
 
         if ($doc->paymentmethoddetails) {
-            $this->_parsePaypalPaymentDetails($doc->paymentmethoddetails);
+            $this->_parsePaymentDetails($doc->paymentmethoddetails);
         }
 
         return $this;
     }
 
-    private function _parsePaypalPaymentDetails(\SimpleXMLElement $xml)
+    private function _parsePaymentDetails(\SimpleXMLElement $xml)
     {
         $nodes = $xml->children();
 
         if (0 === $nodes->count()) {
             $value = (string) $xml;
             if ($value) {
-                $this->_array['PAYPAL_'.$xml->getName()] = $value;
+                $prefix = strtoupper($this->_array['PAYMENTMETHOD']) . '_';
+                $this->_array[$prefix . $xml->getName()] = $value;
             }
             return;
         }
 
         foreach ($nodes as $nodeXml) {
-            $this->_parsePaypalPaymentDetails($nodeXml);
+            $this->_parsePaymentDetails($nodeXml);
         }
     }
 }

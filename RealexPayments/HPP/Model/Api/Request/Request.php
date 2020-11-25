@@ -175,6 +175,8 @@ class Request
             } else {
                 return $this->_buildPaypalRequestXml();
             }
+        } elseif ($this->_paymentMethod && $this->_type == self::TYPE_PAYMENT_CREDIT) {
+            return $this->_buildApmCreditRequestXml();
         } else {
             return $this->_buildRequestXml();
         }
@@ -264,6 +266,31 @@ class Request
             $this->_currency,
             $this->_paymentMethod,
         ]);
+
+        return $this->_endXmlWriterAndGetXml();
+    }
+
+    private function _buildApmCreditRequestXml()
+    {
+        $this->_startXmlWriter();
+        $this->_addSimpleElement('merchantId');
+        $this->_addSimpleElement('account');
+        $this->_addAmount();
+        $this->_addSimpleElement('orderId');
+        $this->_addSimpleElement('pasRef');
+        $this->_addSimpleElement('paymentMethod');
+        $this->_addComments();
+
+        $this->_addSha1Hash([
+            $this->_timestamp,
+            $this->_merchantId,
+            $this->_orderId,
+            $this->_amount,
+            $this->_currency,
+            $this->_paymentMethod,
+        ]);
+
+        $this->_addSimpleElement('refundHash');
 
         return $this->_endXmlWriterAndGetXml();
     }

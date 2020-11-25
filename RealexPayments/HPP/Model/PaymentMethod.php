@@ -1380,8 +1380,14 @@ class PaymentMethod extends \Magento\Payment\Model\Method\AbstractMethod impleme
                 )
             );
         }
+
+        $parentPasref = $payment->getAdditionalInformation('PASREF');
+        if (!$parentPasref) {
+            $parentPasref = $payment->getAdditionalInformation('pasref');
+        }
+
         $payment->setTransactionId($fields['PASREF'])
-            ->setParentTransactionId($payment->getAdditionalInformation('PASREF'))
+            ->setParentTransactionId($parentPasref)
             ->setTransactionAdditionalInfo(\Magento\Sales\Model\Order\Payment\Transaction::RAW_DETAILS, $fields);
 
         return $this;

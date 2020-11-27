@@ -100,6 +100,17 @@ class SessionResult extends \Magento\Framework\App\Action\Action
         } else {
             $this->_cancel();
             $this->_session->setData(\RealexPayments\HPP\Block\Process\Result\Observe::OBSERVE_KEY, '1');
+
+            $message = !empty($response['order_id'])
+                ? $this->_getAdditionalInformationFromOrderPayment($response['order_id'], 'MESSAGE')
+                : '';
+
+            if ($message) {
+                $this->messageManager->addErrorMessage(
+                    $message,
+                    'realex_messages'
+                );
+            }
             $this->messageManager->addError(
                 __('Your payment was unsuccessful. Please try again or use a different card / payment method.'),
                 'realex_messages'
@@ -236,5 +247,25 @@ class SessionResult extends \Magento\Framework\App\Action\Action
         }
 
         return $this->_order;
+    }
+
+    /**
+     * Retreive additional information from Order Payment.
+     *
+     * @param string $incrementId
+     * @param string $key
+     *
+     * @return mixed
+     */
+    private function _getAdditionalInformationFromOrderPayment($incrementId, $key) {
+        $order = $this->_getOrder($incrementId);
+        if ($order) {
+            $payment = $order->getPayment();
+            if ($payment) {
+                return $payment->getAdditionalInformation($key);
+            }
+        }
+
+        return null;
     }
 }

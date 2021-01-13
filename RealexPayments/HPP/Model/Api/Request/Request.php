@@ -213,12 +213,12 @@ class Request
         $this->_startXmlWriter();
         $this->_addSimpleElement('merchantId');
         $this->_addSimpleElement('account');
+        $this->_addAmount();
         $this->_addSimpleElement('orderId');
         $this->_addSimpleElement('pasRef');
         $this->_addSimpleElement('paymentMethod');
 
         $this->_xmlWriter->startElement('paymentmethoddetails');
-        $this->_addAmount();
         $this->_xmlWriter->endElement();
 
         $this->_addComments();
@@ -227,8 +227,8 @@ class Request
             $this->_timestamp,
             $this->_merchantId,
             $this->_orderId,
-            '',
-            '',
+            $this->_amount,
+            $this->_currency,
             $this->_paymentMethod,
         ]);
 

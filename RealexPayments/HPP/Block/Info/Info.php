@@ -43,7 +43,6 @@ class Info extends \Magento\Payment\Block\Info
 
         // APM fields begin
         $apmFields = [
-            'orderid'       => 'Order ID',
             'timestamp'     => 'Timestamp',
             'result'        => 'Result',
             'message'       => 'Message',

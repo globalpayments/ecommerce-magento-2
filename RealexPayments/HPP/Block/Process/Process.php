@@ -77,7 +77,9 @@ class Process extends \Magento\Payment\Block\Form
                 $additionalInfo['MERCHANT_ID'] = $result['MERCHANT_ID'];
                 $additionalInfo['ACCOUNT'] = $result['ACCOUNT'];
                 $additionalInfo['ORDER_ID'] = $result['ORDER_ID'];
+                $additionalInfo['TIMESTAMP'] = $result['TIMESTAMP'];
                 $additionalInfo['AMOUNT'] = (string) $result['AMOUNT'];
+
                 $this->_helper->setAdditionalInfo($payment, $additionalInfo);
                 $this->_order->save();
             }

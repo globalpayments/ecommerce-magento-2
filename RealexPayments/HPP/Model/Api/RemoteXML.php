@@ -134,13 +134,21 @@ class RemoteXML implements \RealexPayments\HPP\Api\RemoteXMLInterface
         $additional = $this->_toStrUpperArrayKeys($payment->getAdditionalInformation());
         $is_apm = !empty($additional['PAYMENTMETHOD']);
         $orderId = !empty($additional['ORDERID']) ? $additional['ORDERID'] : $additional['ORDER_ID'];
+        $multiSettleMode = !empty($additional['AUTO_SETTLE_FLAG'])
+            && $additional['AUTO_SETTLE_FLAG'] === SettleMode::SETTLEMODE_MULTI;
 
-        if ($additional['AUTO_SETTLE_FLAG'] == SettleMode::SETTLEMODE_MULTI) {
-            $orderId = '_multisettle_'.$additional['ORDER_ID'];
-            $rawFields = $transaction->getAdditionalInformation(
+        if ($multiSettleMode && !$is_apm) {
+            $orderId = '_multisettle_' . $additional['ORDER_ID'];
+        }
+
+        $transactionAdditionalInfo = $this->_toStrUpperArrayKeys(
+            $transaction->getAdditionalInformation(
                 \Magento\Sales\Model\Order\Payment\Transaction::RAW_DETAILS
-            );
-            $pasref = $rawFields['PASREF'];
+            )
+        );
+
+        if ($multiSettleMode || $is_apm) {
+            $pasref = $transactionAdditionalInfo['PASREF'];
         } else {
             $pasref = !empty($additional['PASREF']) ? $additional['PASREF'] : '';
         }

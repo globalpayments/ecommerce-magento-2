@@ -147,7 +147,7 @@ class RemoteXML implements \RealexPayments\HPP\Api\RemoteXMLInterface
             )
         );
 
-        if ($multiSettleMode || $is_apm) {
+        if (!empty($transactionAdditionalInfo['PASREF']) && ($multiSettleMode || $is_apm)) {
             $pasref = $transactionAdditionalInfo['PASREF'];
         } else {
             $pasref = !empty($additional['PASREF']) ? $additional['PASREF'] : '';

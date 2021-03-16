@@ -22,7 +22,7 @@
                     <frontend_model>Magento\Paypal\Block\Adminhtml\System\Config\Fieldset\Payment</frontend_model>
                     <group id="realexpayments_hpp_basic" translate="label" showInDefault="1" showInWebsite="1" showInStore="1" sortOrder="5">
                         <comment>
-                            <![CDATA[Reduce the cost of PCI Compliance and risk of chargebacks with our fully customisable Hosted Checkout, Card Storage and Fraud Management solution with Magento 2. If you need a sandbox account <a href="https://www.globalpaymentsinc.com/en-gb/accept-payments/ecommerce/partners/magento" target="_blank">please click here</a>.]]>
+                            <![CDATA[Reduce the cost of PCI Compliance and risk of chargebacks with our fully customisable Hosted Checkout, Card Storage and Fraud Management solution with Magento 2. If you need a sandbox account <a href="https://developer.globalpay.com/user/register" target="_blank">please click here</a>.]]>
                         </comment>
                         <label>Basic Settings</label>
                         <attribute type="expanded">0</attribute>

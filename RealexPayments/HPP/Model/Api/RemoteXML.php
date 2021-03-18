@@ -134,6 +134,12 @@ class RemoteXML implements \RealexPayments\HPP\Api\RemoteXMLInterface
         $additional = $this->_toStrUpperArrayKeys($payment->getAdditionalInformation());
         $is_apm = !empty($additional['PAYMENTMETHOD']);
         $orderId = !empty($additional['ORDERID']) ? $additional['ORDERID'] : $additional['ORDER_ID'];
+        $multiSettleMode = !empty($additional['AUTO_SETTLE_FLAG'])
+            && $additional['AUTO_SETTLE_FLAG'] === SettleMode::SETTLEMODE_MULTI;
+
+        if ($multiSettleMode && !$is_apm) {
+            $orderId = '_multisettle_' . $additional['ORDER_ID'];
+        }
 
         $transactionAdditionalInfo = $this->_toStrUpperArrayKeys(
             $transaction->getAdditionalInformation(
@@ -141,7 +147,7 @@ class RemoteXML implements \RealexPayments\HPP\Api\RemoteXMLInterface
             )
         );
 
-        if (!empty($transactionAdditionalInfo['PASREF'])) {
+        if (!empty($transactionAdditionalInfo['PASREF']) && ($multiSettleMode || $is_apm)) {
             $pasref = $transactionAdditionalInfo['PASREF'];
         } else {
             $pasref = !empty($additional['PASREF']) ? $additional['PASREF'] : '';

@@ -1394,6 +1394,23 @@ class PaymentMethod extends \Magento\Payment\Model\Method\AbstractMethod impleme
     }
 
     /**
+     * Cancel payment.
+     *
+     * @param \Magento\Payment\Model\InfoInterface $payment
+     *
+     * @return $this|\Magento\Payment\Model\Method\AbstractMethod
+     *
+     * @throws \Magento\Framework\Exception\LocalizedException
+     */
+    public function cancel(\Magento\Payment\Model\InfoInterface $payment)
+    {
+        parent::cancel($payment);
+        $this->void($payment);
+
+        return $this;
+    }
+
+    /**
      * Refund specified amount for payment.
      *
      * @param \Magento\Payment\Model\InfoInterface $payment

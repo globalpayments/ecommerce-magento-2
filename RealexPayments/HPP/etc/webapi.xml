@@ -11,8 +11,8 @@
         <resources>
             <resource ref="self"/>
         </resources>
-        <!--<data>-->
-            <!--<parameter name="cartId" force="true">%cart_id%</parameter>-->
-        <!--</data>-->
+        <data>
+            <parameter name="cartId" force="true">%cart_id%</parameter>
+        </data>
     </route>
 </routes>

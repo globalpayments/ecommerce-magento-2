@@ -46,7 +46,18 @@ define(
                     return;
                 }
 
-                var data = JSON.parse(json);
+                var data;
+
+                try {
+                    data = JSON.parse(json);
+                } catch (e) {
+                    data = null;
+                }
+
+                if (!data) {
+                    return;
+                }
+
                 if (data.iframe && window.checkoutConfig.payment[quote.paymentMethod().method].iframeEnabled === '1') {
                     if (this.iframeHeight() != data.iframe.height && data.iframe.height != '0px') {
                         this.iframeHeight(data.iframe.height);

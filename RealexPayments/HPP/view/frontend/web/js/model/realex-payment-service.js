@@ -32,13 +32,15 @@ define(
                 //Was the click on a link?
                 if ($(event.target).closest('a, span, button, input').length) {
                     //restore the cart and close the iframe
-                    restoreCartAction();
+                    restoreCartAction(event);
                     isInAction(false);
                     isLightboxReady(false);
+                    return true;
                 } else {
                     //stop the click from propagating.
                     event.stopImmediatePropagation();
                     event.preventDefault();
+                    return false;
                 }
             },
             iframeResize: function(json) {

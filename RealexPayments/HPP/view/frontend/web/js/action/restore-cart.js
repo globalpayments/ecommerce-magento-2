@@ -10,8 +10,7 @@ define(
     ],
     function($, quote, urlBuilder, storage, errorProcessor, customer, fullScreenLoader) {
         'use strict';
-        return function() {
-
+        return function(event) {
             var serviceUrl,
                 payload;
 
@@ -29,6 +28,7 @@ define(
                     cart_id: quote.getQuoteId()
                 };
             }
+
             fullScreenLoader.startLoader();
 
             return storage.post(
@@ -36,6 +36,7 @@ define(
             ).done(
                 function() {
                     fullScreenLoader.stopLoader();
+                    $(event.target).click();
                 }
             ).fail(
                 function(response) {

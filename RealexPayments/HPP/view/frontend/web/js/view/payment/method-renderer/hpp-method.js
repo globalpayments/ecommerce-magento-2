@@ -58,7 +58,12 @@ define(
                                         lightboxAction();
                                     } else {
                                         // capture all click events
-                                        document.addEventListener('click', realexPaymentService.leaveIframeForLinks, true);
+                                        document.addEventListener('click', function cb(event) {
+                                            realexPaymentService.stopEventPropagation(event);
+                                            if (realexPaymentService.leaveIframeForLinks(event)) {
+                                                event.currentTarget.removeEventListener(event.type, cb);
+                                            }
+                                        });
                                         //These two are left to indicate the different methods this can be used.
                                         //document.addEventListener('click', realexPaymentService.stopEventPropagation, true);
                                         //document.addEventListener('click', realexPaymentService.leaveEmbeddedIframe, true);

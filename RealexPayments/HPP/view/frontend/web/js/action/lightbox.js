@@ -4,9 +4,10 @@ define(
         'RealexPayments_HPP/js/action/restore-cart',
         'RealexPayments_HPP/js/model/realex-payment-service',
         'Magento_Ui/js/modal/modal',
+        'Magento_Checkout/js/model/full-screen-loader',
         'mage/translate'
     ],
-    function($, restoreCartAction, realexPaymentService, modal, $t) {
+    function($, restoreCartAction, realexPaymentService, modal, fullScreenLoader, $t) {
         'use strict';
 
         return function() {
@@ -24,9 +25,18 @@ define(
                     }
                 }],
                 closed: function() {
-                    restoreCartAction();
-                    realexPaymentService.isInAction(false);
-                    realexPaymentService.isLightboxReady(false);
+                    fullScreenLoader.startLoader();
+                    restoreCartAction()
+                        .fail(
+                            function(response) {
+                                errorProcessor.process(response);
+                            }
+                        ).always(
+                            function() {
+                                realexPaymentService.resetIframe();
+                                fullScreenLoader.stopLoader();
+                            }
+                    );
                 }
             };
             $("#realex-iframe-container").modal(options).modal('openModal');

@@ -4,11 +4,9 @@ define(
         'Magento_Checkout/js/model/quote',
         'Magento_Checkout/js/model/url-builder',
         'mage/storage',
-        'Magento_Checkout/js/model/error-processor',
-        'Magento_Customer/js/model/customer',
-        'Magento_Checkout/js/model/full-screen-loader'
+        'Magento_Customer/js/model/customer'
     ],
-    function($, quote, urlBuilder, storage, errorProcessor, customer, fullScreenLoader) {
+    function($, quote, urlBuilder, storage, customer) {
         'use strict';
         return function(event) {
             var serviceUrl,
@@ -29,20 +27,8 @@ define(
                 };
             }
 
-            fullScreenLoader.startLoader();
-
             return storage.post(
                 serviceUrl, JSON.stringify(payload)
-            ).done(
-                function() {
-                    fullScreenLoader.stopLoader();
-                    $(event.target).click();
-                }
-            ).fail(
-                function(response) {
-                    errorProcessor.process(response);
-                    fullScreenLoader.stopLoader();
-                }
             );
         };
     }

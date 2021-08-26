@@ -7,13 +7,14 @@ define(
         'Magento_Checkout/js/view/payment/default',
         'RealexPayments_HPP/js/action/set-payment-method',
         'RealexPayments_HPP/js/action/lightbox',
+        'RealexPayments_HPP/js/action/restore-cart',
         'Magento_Checkout/js/model/quote',
         'Magento_Checkout/js/model/payment/additional-validators',
         'RealexPayments_HPP/js/model/realex-payment-service',
         'Magento_Checkout/js/model/full-screen-loader',
         'Magento_Checkout/js/model/error-processor'
     ],
-    function(ko, $, Component, setPaymentMethodAction, lightboxAction, quote,
+    function(ko, $, Component, setPaymentMethodAction, lightboxAction, restoreCartAction, quote,
         additionalValidators, realexPaymentService, fullScreenLoader, errorProcessor) {
         'use strict';
         var paymentMethod = ko.observable(null);
@@ -33,10 +34,6 @@ define(
                     realexPaymentService.iframeResize(event.originalEvent.data);
                 });
             },
-            resetIframe: function() {
-                this.isLightboxReady(false);
-                this.isInAction(false);
-            },
             /**
              * Get action url for payment method iframe.
              * @returns {String}
@@ -46,7 +43,7 @@ define(
             },
             /** Redirect */
             continueToPayment: function() {
-                this.resetIframe();
+                realexPaymentService.resetIframe();
                 if (this.validate() && additionalValidators.validate()) {
                     if (window.checkoutConfig.payment[quote.paymentMethod().method].iframeEnabled === '1') {
                         setPaymentMethodAction()
@@ -59,14 +56,29 @@ define(
                                     } else {
                                         // capture all click events
                                         document.addEventListener('click', function cb(event) {
-                                            realexPaymentService.stopEventPropagation(event);
-                                            if (realexPaymentService.leaveIframeForLinks(event)) {
-                                                event.currentTarget.removeEventListener(event.type, cb);
+                                            //Was the click on a link?
+                                            if ($(event.target).closest('a, span, button, input').length) {
+                                                fullScreenLoader.startLoader();
+                                                event.currentTarget.removeEventListener(event.type, cb, true);
+                                                if ($(event.target).closest('a').length) {
+                                                    realexPaymentService.stopEventPropagation(event);
+                                                }
+                                                restoreCartAction()
+                                                    .fail(
+                                                        function(response) {
+                                                            errorProcessor.process(response);
+                                                        }
+                                                    ).always(
+                                                        function() {
+                                                            realexPaymentService.resetIframe();
+                                                            fullScreenLoader.stopLoader();
+                                                            if ($(event.target).closest('a').length) {
+                                                                $(event.target).click();
+                                                            }
+                                                        }
+                                                    );
                                             }
-                                        });
-                                        //These two are left to indicate the different methods this can be used.
-                                        //document.addEventListener('click', realexPaymentService.stopEventPropagation, true);
-                                        //document.addEventListener('click', realexPaymentService.leaveEmbeddedIframe, true);
+                                        }, true);
                                     }
                                 }
                             ).fail(

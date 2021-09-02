@@ -2,11 +2,10 @@ define(
     [
         'underscore',
         'ko',
-        'RealexPayments_HPP/js/action/restore-cart',
         'Magento_Checkout/js/model/quote',
         'jquery'
     ],
-    function(_, ko, restoreCartAction, quote, $) {
+    function(_, ko, quote, $) {
         'use strict';
 
         var isInAction = ko.observable(false);
@@ -23,23 +22,9 @@ define(
                 event.stopImmediatePropagation();
                 event.preventDefault();
             },
-            leaveEmbeddedIframe: function() {
-                restoreCartAction();
+            resetIframe: function () {
                 isInAction(false);
                 isLightboxReady(false);
-            },
-            leaveIframeForLinks: function(event) {
-                //Was the click on a link?
-                if ($(event.target).closest('a, span, button, input').length) {
-                    //restore the cart and close the iframe
-                    restoreCartAction();
-                    isInAction(false);
-                    isLightboxReady(false);
-                } else {
-                    //stop the click from propagating.
-                    event.stopImmediatePropagation();
-                    event.preventDefault();
-                }
             },
             iframeResize: function(json) {
                 if (typeof json !== 'string') {

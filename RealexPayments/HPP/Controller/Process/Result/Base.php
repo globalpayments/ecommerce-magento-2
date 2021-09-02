@@ -195,7 +195,7 @@ class Base extends \Magento\Framework\App\Action\Action
      *
      * @param  array  $response
      *
-     * @return array|bool
+     * @return array|null
      */
     private function _buildSessionParams($result, $response)
     {
@@ -206,7 +206,7 @@ class Base extends \Magento\Framework\App\Action\Action
 
         // if no order id exists
         if (!$this->_order) {
-            return false;
+            return null;
         } else {
             $orderid = $this->_order->getIncrementId();
         }

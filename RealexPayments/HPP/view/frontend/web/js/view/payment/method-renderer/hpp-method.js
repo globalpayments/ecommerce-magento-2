@@ -5,7 +5,6 @@ define(
         'ko',
         'jquery',
         'Magento_Checkout/js/view/payment/default',
-        'RealexPayments_HPP/js/action/set-payment-method',
         'RealexPayments_HPP/js/action/lightbox',
         'RealexPayments_HPP/js/action/restore-cart',
         'Magento_Checkout/js/model/quote',
@@ -14,7 +13,7 @@ define(
         'Magento_Checkout/js/model/full-screen-loader',
         'Magento_Checkout/js/model/error-processor'
     ],
-    function(ko, $, Component, setPaymentMethodAction, lightboxAction, restoreCartAction, quote,
+    function(ko, $, Component, lightboxAction, restoreCartAction, quote,
         additionalValidators, realexPaymentService, fullScreenLoader, errorProcessor) {
         'use strict';
         var paymentMethod = ko.observable(null);
@@ -28,6 +27,7 @@ define(
             isLightboxReady: realexPaymentService.isLightboxReady,
             iframeHeight: realexPaymentService.iframeHeight,
             iframeWidth: realexPaymentService.iframeWidth,
+            redirectAfterPlaceOrder: false,
             initialize: function() {
                 this._super();
                 $(window).bind('message', function(event) {
@@ -46,7 +46,7 @@ define(
                 realexPaymentService.resetIframe();
                 if (this.validate() && additionalValidators.validate()) {
                     if (window.checkoutConfig.payment[quote.paymentMethod().method].iframeEnabled === '1') {
-                        setPaymentMethodAction()
+                        this.getPlaceOrderDeferredObject()
                             .done(
                                 function() {
                                     realexPaymentService.isInAction(true);
@@ -88,7 +88,7 @@ define(
                                 }
                             );
                     } else {
-                        setPaymentMethodAction()
+                        this.getPlaceOrderDeferredObject()
                             .done(
                                 function() {
                                     $.mage.redirect(window.checkoutConfig.payment[quote.paymentMethod().method].redirectUrl);

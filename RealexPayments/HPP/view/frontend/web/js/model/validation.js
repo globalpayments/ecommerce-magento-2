@@ -27,8 +27,26 @@ define(
                 var shippingAddress = quote.shippingAddress(),
                     billingAddress = quote.billingAddress();
 
-                return (this.isValidAddress(shippingAddress, errorMessages.invalidShippingAddress) &&
-                    this.isValidAddress(billingAddress, errorMessages.invalidBillingAddress));
+                /**
+                 * Customer edits his address, and forgets to save it
+                 * Magento will throw an error
+                 */
+                if (!billingAddress) {
+                    return true;
+                }
+
+                /**
+                 * Normal flow
+                 */
+                if (shippingAddress && shippingAddress.firstname && shippingAddress.lastname) {
+                    return (this.isValidAddress(shippingAddress, errorMessages.invalidShippingAddress) &&
+                        this.isValidAddress(billingAddress, errorMessages.invalidBillingAddress));
+                }
+
+                /**
+                 * Virtual product in cart and guest user (no shipping address provided by Magento)
+                 */
+                return this.isValidAddress(billingAddress, errorMessages.invalidBillingAddress);
             },
 
             /**

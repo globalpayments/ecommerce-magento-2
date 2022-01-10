@@ -1356,6 +1356,15 @@ class PaymentMethod extends \Magento\Payment\Model\Method\AbstractMethod impleme
     public function refund(\Magento\Payment\Model\InfoInterface $payment, $amount)
     {
         parent::refund($payment, $amount);
+
+        /**
+         * If the amount is 0, it means that the user is refunding a Gift Card,
+         * so we do not send it to HPP
+         */
+        if ((float) $amount === 0.00) {
+            return $this;
+        }
+
         $order = $payment->getOrder();
         $comments = $payment->getCreditMemo()->getComments();
         $grandTotal = $order->getBaseGrandTotal();

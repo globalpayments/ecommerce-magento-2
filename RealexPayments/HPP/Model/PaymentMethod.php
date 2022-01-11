@@ -1361,7 +1361,7 @@ class PaymentMethod extends \Magento\Payment\Model\Method\AbstractMethod impleme
          * If the amount is 0, it means that the user is refunding a Gift Card,
          * so we do not send it to HPP
          */
-        if ((float) $amount === 0.00) {
+        if (empty((float) $amount)) {
             return $this;
         }
 

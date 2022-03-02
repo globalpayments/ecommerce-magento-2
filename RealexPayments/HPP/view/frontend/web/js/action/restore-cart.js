@@ -4,9 +4,10 @@ define(
         'Magento_Checkout/js/model/quote',
         'Magento_Checkout/js/model/url-builder',
         'mage/storage',
-        'Magento_Customer/js/model/customer'
+        'Magento_Customer/js/model/customer',
+        'Magento_ReCaptchaWebapiUi/js/webapiReCaptchaRegistry'
     ],
-    function($, quote, urlBuilder, storage, customer) {
+    function($, quote, urlBuilder, storage, customer, registry) {
         'use strict';
         return function(event) {
             var serviceUrl,
@@ -25,6 +26,14 @@ define(
                 payload = {
                     cart_id: quote.getQuoteId()
                 };
+            }
+
+            /**
+             * If we have a reCaptcha token for checkout, we remove it,
+             * so Magento can generate a new one
+             */
+            if (registry.tokens.hasOwnProperty('recaptcha-checkout-place-order')) {
+                delete registry.tokens['recaptcha-checkout-place-order'];
             }
 
             return storage.post(

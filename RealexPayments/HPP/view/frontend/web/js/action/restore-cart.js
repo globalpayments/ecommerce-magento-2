@@ -29,7 +29,7 @@ define(
             }
 
             /**
-             * This is component being required separately because it's only available in Magento 2.4.3,
+             * This component is being required separately because it's only available in Magento 2.4.3,
              * so, in lower versions we catch the error that is being thrown, and just continue the normal flow
              */
             require(

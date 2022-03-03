@@ -1,13 +1,13 @@
 define(
     [
         'jquery',
+        'require',
         'Magento_Checkout/js/model/quote',
         'Magento_Checkout/js/model/url-builder',
         'mage/storage',
-        'Magento_Customer/js/model/customer',
-        'Magento_ReCaptchaWebapiUi/js/webapiReCaptchaRegistry'
+        'Magento_Customer/js/model/customer'
     ],
-    function($, quote, urlBuilder, storage, customer, registry) {
+    function($, require, quote, urlBuilder, storage, customer) {
         'use strict';
         return function(event) {
             var serviceUrl,
@@ -29,12 +29,24 @@ define(
             }
 
             /**
-             * If we have a reCaptcha token for checkout, we remove it,
-             * so Magento can generate a new one
+             * This is component being required separately because it's only available in Magento 2.4.3,
+             * so, in lower versions we catch the error that is being thrown, and just continue the normal flow
              */
-            if (registry.tokens.hasOwnProperty('recaptcha-checkout-place-order')) {
-                delete registry.tokens['recaptcha-checkout-place-order'];
-            }
+            require(
+                [
+                    'Magento_ReCaptchaWebapiUi/js/webapiReCaptchaRegistry'
+                ],
+                function (registry) {
+                    /**
+                     * If we have a reCaptcha token for checkout, we remove it,
+                     * so Magento can generate a new one
+                     */
+                    if (registry.tokens.hasOwnProperty('recaptcha-checkout-place-order')) {
+                        delete registry.tokens['recaptcha-checkout-place-order'];
+                    }
+                },
+                function (error) { }
+            );
 
             return storage.post(
                 serviceUrl, JSON.stringify(payload)

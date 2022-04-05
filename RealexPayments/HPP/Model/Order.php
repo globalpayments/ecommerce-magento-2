@@ -96,7 +96,7 @@ class Order extends parentOrder
     {
         $payment = $this->getPayment();
 
-        if ($payment->getMethod() == PaymentMethod::METHOD_CODE) {
+        if ($payment && $payment->getMethod() == PaymentMethod::METHOD_CODE) {
             $additionalInformation = $payment->getAdditionalInformation();
             if (isset($additionalInformation['PAYMENTMETHOD'])
                 && $additionalInformation['PAYMENTMETHOD'] == 'paypal'

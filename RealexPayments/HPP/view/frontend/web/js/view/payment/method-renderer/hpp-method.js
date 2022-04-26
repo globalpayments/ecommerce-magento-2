@@ -29,9 +29,14 @@ define(
             iframeWidth: realexPaymentService.iframeWidth,
             redirectAfterPlaceOrder: false,
             initialize: function() {
+                var self = this;
                 this._super();
+                $('#realex-iframe-container iframe').on('load', function() {
+                    fullScreenLoader.stopLoader();
+                });
                 $(window).bind('message', function(event) {
                     realexPaymentService.iframeResize(event.originalEvent.data);
+                    self.processHppData(event.originalEvent.data);
                 });
             },
             /**
@@ -43,6 +48,7 @@ define(
             },
             /** Redirect */
             continueToPayment: function() {
+                fullScreenLoader.startLoader();
                 realexPaymentService.resetIframe();
                 if (this.validate() && additionalValidators.validate()) {
                     if (window.checkoutConfig.payment[quote.paymentMethod().method].iframeEnabled === '1') {
@@ -105,6 +111,17 @@ define(
             },
             validate: function() {
                 return true;
+            },
+            processHppData: function(data) {
+                var receivedData;
+
+                try {
+                    receivedData = JSON.parse(data);
+                } catch (e) { }
+
+                if (receivedData && receivedData.iframe && receivedData.iframe.height === '0px') {
+                    fullScreenLoader.startLoader();
+                }
             },
             /**
              * Hide loader when iframe is fully loaded.

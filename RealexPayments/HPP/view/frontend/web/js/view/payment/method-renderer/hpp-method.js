@@ -119,6 +119,9 @@ define(
                     receivedData = JSON.parse(data);
                 } catch (e) { }
 
+                /**
+                 * When the HPP hides itself, show the spinner
+                 */
                 if (receivedData && receivedData.iframe && receivedData.iframe.height === '0px') {
                     fullScreenLoader.startLoader();
                 }

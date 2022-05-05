@@ -48,9 +48,9 @@ define(
             },
             /** Redirect */
             continueToPayment: function() {
-                fullScreenLoader.startLoader();
                 realexPaymentService.resetIframe();
                 if (this.validate() && additionalValidators.validate()) {
+                    fullScreenLoader.startLoader();
                     if (window.checkoutConfig.payment[quote.paymentMethod().method].iframeEnabled === '1') {
                         this.getPlaceOrderDeferredObject()
                             .done(

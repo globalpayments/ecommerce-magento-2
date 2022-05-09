@@ -131,7 +131,8 @@ class Data extends AbstractHelper
         $this->_orderFactory = $orderFactory;
     }
 
-    public function setStoreId($storeId) {
+    public function setStoreId($storeId)
+    {
         $this->_storeId = $storeId;
         return $this;
     }
@@ -253,6 +254,7 @@ class Data extends AbstractHelper
         $formFields['PROD_ID'] = $prodId;
         $formFields['HPP_VERSION'] = '2';
         $formFields['HPP_CUSTOMER_EMAIL'] = $customer->getEmail();
+        $formFields['MAGENTO_CUSTOMER_ID'] = $customerId;
         if (isset($realexLang) && !empty($realexLang)) {
             $formFields['HPP_LANG'] = $realexLang;
         }

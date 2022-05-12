@@ -1,14 +1,27 @@
-<div id="realexpayments-cards" data-bind="scope:'realexpayments-cards'" >
-    <!-- ko template: getTemplate() --><!-- /ko -->
-<script type="text/x-magento-init">
-       {
-           "#realexpayments-cards": {
-               "Magento_Ui/js/core/app": <?php /* @escapeNotVerified */ echo $block->getJsLayout();?>
-           }
-       }
-</script>
-<input type="hidden" id="realex-iframe" value="<?php echo $block->escapeHtml($block->getIframeUrl());?>" />
-</div>
-<p><?php echo $block->escapeHtml(
-    __('In this section you can Edit or Delete your stored cards or Add a new one to your account')
-); ?></p>
+<?php if ($block->customerHasAddress()): ?>
+    <div id="realexpayments-cards" data-bind="scope:'realexpayments-cards'" >
+        <!-- ko template: getTemplate() --><!-- /ko -->
+        <script type="text/x-magento-init">
+               {
+                   "#realexpayments-cards": {
+                       "Magento_Ui/js/core/app": <?= /* @escapeNotVerified */ $block->getJsLayout();?>
+                   }
+               }
+        </script>
+        <input type="hidden" id="realex-iframe" value="<?= $block->escapeHtml($block->getIframeUrl());?>" />
+    </div>
+    <p>
+        <?= $block->escapeHtml(
+            __('In this section you can Edit or Delete your stored cards or Add a new one to your account.')
+        );
+        ?>
+    </p>
+<?php else: ?>
+    <p>
+        <?= $block->escapeHtml(
+            __('In order to Edit or Delete your stored cards or to Add a new one to your account,
+            you will need to add an address to your account.')
+        );
+        ?>
+    </p>
+<?php endif ?>

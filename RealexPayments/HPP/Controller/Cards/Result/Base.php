@@ -3,6 +3,7 @@
 namespace RealexPayments\HPP\Controller\Cards\Result;
 
 use RealexPayments\HPP\Block\Process;
+use RealexPayments\HPP\Helper\CardStorage as CardStorageHelper;
 
 class Base extends \Magento\Framework\App\Action\Action
 {
@@ -12,13 +13,16 @@ class Base extends \Magento\Framework\App\Action\Action
     private $_helper;
 
     /**
+     * @var CardStorageHelper
+     */
+    private $cardStorageHelper;
+
+    /**
      * @var \Magento\Framework\UrlInterface
      */
     protected $_url;
 
     /**
-     * Core registry.
-     *
      * @var \Magento\Framework\Registry\Registry
      */
     private $coreRegistry;
@@ -32,17 +36,20 @@ class Base extends \Magento\Framework\App\Action\Action
      * Result constructor.
      *
      * @param \Magento\Framework\App\Action\Context $context
-     * @param \RealexPayments\HPP\Helper\Data       $helper
-     * @param \Magento\Framework\Registry           $coreRegistry
-     * @param \RealexPayments\HPP\Logger\Logger     $logger
+     * @param \RealexPayments\HPP\Helper\Data $helper
+     * @param CardStorageHelper $cardStorageHelper
+     * @param \Magento\Framework\Registry $coreRegistry
+     * @param \RealexPayments\HPP\Logger\Logger $logger
      */
     public function __construct(
         \Magento\Framework\App\Action\Context $context,
         \RealexPayments\HPP\Helper\Data $helper,
+        CardStorageHelper $cardStorageHelper,
         \Magento\Framework\Registry $coreRegistry,
         \RealexPayments\HPP\Logger\Logger $logger
     ) {
         $this->_helper = $helper;
+        $this->cardStorageHelper = $cardStorageHelper;
         $this->_url = $context->getUrl();
         $this->coreRegistry = $coreRegistry;
         $this->_logger = $logger;
@@ -51,7 +58,7 @@ class Base extends \Magento\Framework\App\Action\Action
     }
 
     /**
-     * @throws \Magento\Framework\Exception\LocalizedException
+     * @inheritdoc
      */
     public function execute()
     {
@@ -63,6 +70,11 @@ class Base extends \Magento\Framework\App\Action\Action
             if ($response) {
                 $result = $this->_handleResponse($response);
                 $params['returnUrl'] = $this->_url->getUrl('realexpayments_hpp/cards/success');
+                $customerId = $response['MAGENTO_CUSTOMER_ID'];
+
+                if ($result && $customerId) {
+                    $this->cardStorageHelper->handleCardStorage($response, $customerId);
+                }
             }
         } catch (\Exception $e) {
             $this->_logger->critical($e);
@@ -75,6 +87,8 @@ class Base extends \Magento\Framework\App\Action\Action
     }
 
     /**
+     * Handles the response received from HPP.
+     *
      * @param array $response
      *
      * @return bool
@@ -122,7 +136,7 @@ class Base extends \Magento\Framework\App\Action\Action
         $sha1hash = $this->_helper->signFields("$timestamp.$merchantid.$orderid.$result.$message.$pasref.$authcode");
 
         //Check to see if hashes match or not
-        if ($sha1hash !== $realexsha1){
+        if ($sha1hash !== $realexsha1) {
             return false;
         }
 

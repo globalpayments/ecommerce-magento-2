@@ -5,9 +5,10 @@ define(
         'RealexPayments_HPP/js/model/realex-payment-service',
         'Magento_Ui/js/modal/modal',
         'Magento_Checkout/js/model/full-screen-loader',
-        'mage/translate'
+        'mage/translate',
+        'Magento_Checkout/js/model/error-processor'
     ],
-    function($, restoreCartAction, realexPaymentService, modal, fullScreenLoader, $t) {
+    function($, restoreCartAction, realexPaymentService, modal, fullScreenLoader, $t, errorProcessor) {
         'use strict';
 
         return function() {

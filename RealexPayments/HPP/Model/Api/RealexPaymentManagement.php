@@ -6,6 +6,7 @@ use Magento\Sales\Api\Data\OrderInterface;
 use Magento\Sales\Api\OrderRepositoryInterface;
 use Magento\Sales\Model\Order;
 use RealexPayments\HPP\Model\Config\Source\SettleMode;
+use RealexPayments\HPP\Helper\CardStorage as CardStorageHelper;
 
 class RealexPaymentManagement implements \RealexPayments\HPP\Api\RealexPaymentManagementInterface
 {
@@ -16,6 +17,11 @@ class RealexPaymentManagement implements \RealexPayments\HPP\Api\RealexPaymentMa
      * @var \RealexPayments\HPP\Helper\Data
      */
     private $_helper;
+
+    /**
+     * @var CardStorageHelper
+     */
+    private $cardStorageHelper;
 
     /**
      * @var \RealexPayments\HPP\Api\RemoteXMLInterface
@@ -58,18 +64,20 @@ class RealexPaymentManagement implements \RealexPayments\HPP\Api\RealexPaymentMa
     /**
      * RealexPaymentManagement constructor.
      *
-     * @param  \RealexPayments\HPP\Helper\Data  $helper
-     * @param  \RealexPayments\HPP\Api\RemoteXMLInterface  $remoteXml
-     * @param  \Magento\Checkout\Model\Session  $session
-     * @param  \Magento\Sales\Model\Order\Payment\Transaction\BuilderInterface  $transactionBuilder
-     * @param  \RealexPayments\HPP\Logger\Logger  $logger
-     * @param  \Magento\Sales\Model\Order\Email\Sender\OrderSender  $orderSender
-     * @param  \Magento\Sales\Model\Order\Status\HistoryFactory  $orderHistoryFactory
-     * @param  \Magento\Customer\Api\CustomerRepositoryInterface  $customerRepository
-     * @param  \Magento\Sales\Model\OrderRepository  $orderRepository
+     * @param \RealexPayments\HPP\Helper\Data $helper
+     * @param CardStorageHelper $cardStorageHelper
+     * @param \RealexPayments\HPP\Api\RemoteXMLInterface $remoteXml
+     * @param \Magento\Checkout\Model\Session $session
+     * @param \Magento\Sales\Model\Order\Payment\Transaction\BuilderInterface $transactionBuilder
+     * @param \RealexPayments\HPP\Logger\Logger $logger
+     * @param \Magento\Sales\Model\Order\Email\Sender\OrderSender $orderSender
+     * @param \Magento\Sales\Model\Order\Status\HistoryFactory $orderHistoryFactory
+     * @param \Magento\Customer\Api\CustomerRepositoryInterface $customerRepository
+     * @param \Magento\Sales\Model\OrderRepository $orderRepository
      */
     public function __construct(
         \RealexPayments\HPP\Helper\Data $helper,
+        CardStorageHelper $cardStorageHelper,
         \RealexPayments\HPP\Api\RemoteXMLInterface $remoteXml,
         \Magento\Checkout\Model\Session $session,
         \Magento\Sales\Model\Order\Payment\Transaction\BuilderInterface $transactionBuilder,
@@ -80,6 +88,7 @@ class RealexPaymentManagement implements \RealexPayments\HPP\Api\RealexPaymentMa
         \Magento\Sales\Model\OrderRepository $orderRepository
     ) {
         $this->_helper = $helper;
+        $this->cardStorageHelper = $cardStorageHelper;
         $this->_session = $session;
         $this->_transactionBuilder = $transactionBuilder;
         $this->_logger = $logger;
@@ -156,7 +165,7 @@ class RealexPaymentManagement implements \RealexPayments\HPP\Api\RealexPaymentMa
         //Store payer details if applicable
         $customerId = $order->getCustomerId();
         if (!empty($customerId)) {
-            $this->_handleCardStorage($response, $customerId);
+            $this->cardStorageHelper->handleCardStorage($response, $customerId);
         }
 
         return true;
@@ -333,96 +342,6 @@ class RealexPaymentManagement implements \RealexPayments\HPP\Api\RealexPaymentMa
             $pasref
         );
         $this->_addHistoryComment($order, $message);
-    }
-
-    /**
-     * @desc Handles the card storage fields
-     *
-     * @param  array  $response
-     * @param  string  $customerId
-     */
-    private function _handleCardStorage($response, $customerId)
-    {
-        try {
-            $paymentSetup = isset($response['PMT_SETUP']) ? $response['PMT_SETUP'] : false;
-            $payerRef = isset($response['SAVED_PAYER_REF']) ? $response['SAVED_PAYER_REF'] : false;
-            //Is there a payment setup?
-            if ($paymentSetup) {
-                $payerSetup = isset($response['PAYER_SETUP']) ? $response['PAYER_SETUP'] : false;
-                //Are we setting up a new payer?
-                if ($payerSetup == '00') {
-                    //Store payer ref against the customer
-                    $this->_storeCustomerPayerRef(
-                        $response['MERCHANT_ID'],
-                        $response['ACCOUNT'],
-                        $payerRef,
-                        $customerId
-                    );
-                }
-            }
-
-            $cardRef = isset($response['SAVED_PMT_REF']) ? $response['SAVED_PMT_REF'] : false;
-            if ($cardRef) {
-                //Store card details
-                $this->_helper->logDebug('Customer '.$customerId.' added a new card:'.$cardRef);
-            }
-
-            $cardsEdited = isset($response['HPP_EDITED_PMT_REF']) ? $response['HPP_EDITED_PMT_REF'] : false;
-            $cardsDeleted = isset($response['HPP_DELETED_PMT_REF']) ? $response['HPP_DELETED_PMT_REF'] : false;
-            if ($cardsEdited) {
-                $this->_manageEditedCards($cardsEdited);
-            }
-            if ($cardsDeleted) {
-                $this->_manageDeletedCards($cardsDeleted);
-            }
-        } catch (\Exception $e) {
-            //card storage exceptions should not stop a transaction
-            $this->_logger->critical($e);
-        }
-    }
-
-    /**
-     * @desc Store the payer ref against the customer
-     *
-     * @param  string  $merchantId
-     * @param  string  $account
-     * @param  string  $payerRef
-     * @param  string  $customerId
-     */
-    private function _storeCustomerPayerRef($merchantId, $account, $payerRef, $customerId)
-    {
-        $this->_helper->logDebug('Storing payer ref:'.$payerRef.' for customer: '.$customerId);
-
-        $customer = $this->_customerRepository->getById($customerId);
-        $customer->setCustomAttribute('realexpayments_hpp_payerref', $payerRef);
-        $this->_customerRepository->save($customer);
-        //Update payer in realex
-        try {
-            $this->_remoteXml->payerEdit($merchantId, $account, $payerRef, $customer);
-        } catch (\Exception $e) {
-            //Let it fail but still setup the rest of the payment
-            $this->_logger->critical($e);
-        }
-    }
-
-    /**
-     * @desc Manage cards that were edited while the user was on hpp
-     *
-     * @param  string  $cards
-     */
-    private function _manageEditedCards($cards)
-    {
-        $this->_helper->logDebug('Customer edited the following cards:'.$cards);
-    }
-
-    /**
-     * @desc Manage cards that were deleted while the user was on hpp
-     *
-     * @param  string  $cards
-     */
-    private function _manageDeletedCards($cards)
-    {
-        $this->_helper->logDebug('Customer deleted the following cards:'.$cards);
     }
 
     /**

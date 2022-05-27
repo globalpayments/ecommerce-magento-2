@@ -200,7 +200,7 @@ class Base extends \Magento\Framework\App\Action\Action
     private function _buildSessionParams($result, $response)
     {
         $result = ($result) ? '1' : '0';
-        $timestamp = strftime('%Y%m%d%H%M%S');
+        $timestamp = $this->_helper->generateTimestamp();
         $merchantid = $this->_helper->getConfigData('merchant_id');
         $isApmPending = $this->_paymentManagement->isTransactionApm($response) ? '1' : '0';
 

@@ -311,7 +311,7 @@ class Request
             $this->_xmlWriter->writeAttribute('type', $this->_type);
         }
 
-        $this->_timestamp = strftime('%Y%m%d%H%M%S');
+        $this->_timestamp = $this->_helper->generateTimestamp();
         $this->_xmlWriter->writeAttribute('timestamp', $this->_timestamp);
     }
 

@@ -2,6 +2,7 @@
 
 namespace RealexPayments\HPP\Helper;
 
+use DateTime;
 use Magento\Framework\App\Helper\AbstractHelper;
 use Magento\Sales\Api\Data\OrderInterface;
 use RealexPayments\HPP\Model\Config\Source\Environment;
@@ -221,7 +222,7 @@ class Data extends AbstractHelper
             return [];
         }
 
-        $timestamp = strftime('%Y%m%d%H%M%S');
+        $timestamp = $this->generateTimestamp();
         $merchantId = trim($this->getConfigData('merchant_id'));
         $merchantAccount = trim($this->getConfigData('merchant_account'));
         $fieldOrderId = uniqid() . '_' . $timestamp;
@@ -694,6 +695,18 @@ class Data extends AbstractHelper
     public function getOrderByIncrement($incrementId)
     {
         return $this->_orderFactory->create()->loadByIncrementId($incrementId);
+    }
+
+    /**
+     * Generate the current date/timestamp in the string format (YYYYMMDDHHSS)
+     * required in a request to Realex.
+     *
+     * @return string current timestamp in YYYYMMDDHHSS format
+     */
+    public function generateTimestamp()
+    {
+        $date = new DateTime();
+        return $date->format('YmdHis');
     }
 
     /**

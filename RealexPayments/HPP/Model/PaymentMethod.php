@@ -331,7 +331,7 @@ class PaymentMethod extends \Magento\Payment\Model\Method\AbstractMethod impleme
         $order = $paymentInfo->getOrder();
         $timestamp = $paymentInfo->getAdditionalInformation('TIMESTAMP');
         if (!$timestamp) {
-            $timestamp = strftime('%Y%m%d%H%M%S');
+            $timestamp = $this->_helper->generateTimestamp();
         }
         $merchantId = trim($this->_helper->getConfigData('merchant_id'));
         $merchantAccount = trim($this->_helper->getConfigData('merchant_account'));
